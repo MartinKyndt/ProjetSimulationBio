@@ -34,7 +34,7 @@ def insertion(gene_pos, dom_pos, pos) :
 			if dom_pos[i][j] >= pos :
 				dom_pos[i][j] += 1
 
-"""
+
  #pos1 < pos2
  #Les positions ne se trouvent pas dans les régions codantes
 def inversion(data, pos1, pos2) :
@@ -48,9 +48,7 @@ def inversion(data, pos1, pos2) :
 						new_pos_dom.append(pos1 + pos2 - data[i][j])
 						
 					elif j = 1 or j = 2 : #La position concernée est une barrière de gène
-						new_pos_gene.append(pos1 + pos2 - data[i][j])
-"""			
-			
+						new_pos_gene.append(pos1 + pos2 - data[i][j])	
 
 
 
@@ -87,8 +85,8 @@ print()
 
 insertion(gene_pos, dom_pos, 3500)
 print(gene_pos, dom_pos) 
-
 print()
+
 deletion(gene_pos, dom_pos, 7300) 
 print(gene_pos, dom_pos) 
 
