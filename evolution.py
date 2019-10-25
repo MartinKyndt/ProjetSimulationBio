@@ -57,18 +57,27 @@ def insertion(gene_pos, dom_pos, pos) :
 
  #pos1 < pos2
  #Les positions ne se trouvent pas dans les régions codantes
-def inversion(data, pos1, pos2) :
-	data_copy = data
+def inversion(gene_pos, dom_pos, pos1, pos2) :
 	new_pos_gene = []
 	new_pos_dom = []
-	for i in range(len(data)) :
-		for j in range (len(data[i])) :
-			if data[i][j] > pos1 and data[i][j] < pos2 :
-					if j = 0 or j = 3 : #La position concernée est une barrière de domaine
-						new_pos_dom.append(pos1 + pos2 - data[i][j])
+	for i in range(len(dom_pos)) :
+		for j in range (len(dom_pos[i])) :
+			if dom_pos[i][j] > pos1 and dom_pos[i][j] < pos2 :
+				new_pos_dom.append(pos1 + pos2 - data[i][j])
+			else :
+				new_pos_dom.append(data[i][j])
+					
+	for i in range(len(gene_pos)) :
+		for j in range (len(gene_pos[i])) :
+			if gene_pos[i][j] > pos1 and gene_pos[i][j] < pos2 :
+				new_pos_dom.append(pos1 + pos2 - data[i][j])
+			else :
+				new_pos_dom.append(data[i][j])				
+	new_pos_dom = np.sort(np.array(new_pos_dom)).reshape(2, len(pos_dom))
+	new_pos_gene = np.sort(np.array(new_pos_gene)).reshape(2, len(pos_dom))
+	
+	return (new_pos_gene, new_pos_dom)
 						
-					elif j = 1 or j = 2 : #La position concernée est une barrière de gène
-						new_pos_gene.append(pos1 + pos2 - data[i][j])		
 
 
 #print(inversion(data, 9500, 19000))
