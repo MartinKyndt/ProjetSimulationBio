@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import numpy as np
 import random
 
@@ -18,9 +19,28 @@ def loadData(TSS, TTS) :
 		dom_pos.append([int(tss[i][2]),int(tts[i][2])])
 	return (np.array(gene_pos), np.array(dom_pos))
 
-	
 
-#def writeData(TSS, TTS) 
+def writeData(gene_pos) :
+	f1 = open('TSSevol.dat', 'w')
+	f2 = open('TTSevol.dat', 'w')
+	f1.write('TUindex\tTUorient\tTTS_pos\tTTS_sstrength\n')
+	f2.write('TUindex\tTUorient\tTTS_pos\tTTS_proba_off\n')
+	for i in range(len(gene_pos)):
+		f1.write(str(i)+'\t')
+		f2.write(str(i)+'\t')
+		if gene_pos[i,1]<gene_pos[i,2]:
+			f1.write('+\t')
+			f2.write('+\t')
+		else:
+			f1.write('-\t')
+			f2.write('-\t')
+		f1.write(str(gene_pos[i,1])+'\t.2\n')
+		f2.write(str(gene_pos[i,2])+'\t1.\n')
+	f1.close()
+	f2.close()
+	
+data = loadData('tousgenesidentiques/TSS.dat', 'tousgenesidentiques/TTS.dat')
+writeData(data)
 
 #Ajoute un codon à une position définie dans le génome
 #Décale toutes les positions suivantes
@@ -48,9 +68,7 @@ def inversion(data, pos1, pos2) :
 						new_pos_dom.append(pos1 + pos2 - data[i][j])
 						
 					elif j = 1 or j = 2 : #La position concernée est une barrière de gène
-						new_pos_gene.append(pos1 + pos2 - data[i][j])	
-
-
+						new_pos_gene.append(pos1 + pos2 - data[i][j])		
 
 
 #print(inversion(data, 9500, 19000))
@@ -65,7 +83,7 @@ def deletion(gene_pos, dom_pos, pos) :
 		for j in range(len(dom_pos[i])) :
 			if dom_pos[i][j] >= pos :
 				dom_pos[i][j] -= 1
-	
+
 def randomPos(data) : 
 	deb = 1 
 	fin = data[9][3]
@@ -82,13 +100,6 @@ gene_pos, dom_pos = loadData('tousgenesidentiques/TSS.dat', 'tousgenesidentiques
 
 print(gene_pos, dom_pos)
 print()
-
-insertion(gene_pos, dom_pos, 3500)
-print(gene_pos, dom_pos) 
-print()
-
-deletion(gene_pos, dom_pos, 7300) 
-print(gene_pos, dom_pos) 
 
 #print(randomPos(data))
 
