@@ -15,40 +15,6 @@ def loadData(TSS, TTS) :
 	tss = [[e for e in l[:-1].split('\t')] for l in f1.readlines()[1:]]
 	tts = [[e for e in l[:-1].split('\t')] for l in f2.readlines()[1:]]
 	for i in range(10) :
-<<<<<<< HEAD
-		data.append([int(tss[i][2]),int(tts[i][2]), (3000*i)+1, 3000*(i+1)]) 
-	return(data)
-
-	
-#def writeData(TSS, TTS) 
-
-#Ajoute un codon à une position définie dans le génome
-#Décale toutes les positions suivantes
-def insertion(data, pos) :
-	for i in range(len(data)) :
-		for j in range(len(data[0])) :
-			if data[i][j] >= pos :
-				data[i][j] += 1
-
-#Enlève un codon à une position définie dans le génome
-#Décale toutes les positions suivantes
-def deletion(data, pos) : 
-	for i in range(len(data)) : 
-		for j in range(len(data[0])) : 
-			if(data[i][j] > pos) : 
-				data[i][j] = data[i][j]-1 
-	
-#Génère une position aléatoire dans le génome, en dehors des gènes
-def randomPos(data) 
-
-
-#TEST
-dat = loadData('tousgenesidentiques/TSS.dat', 'tousgenesidentiques/TTS.dat') 
-print(dat)
-deletion(dat, 3) 
-print(dat) 
-print(randomPos(dat))
-=======
 		dom_pos.append([(3000*i)+1, 3000*(i+1)])
 		gene_pos.append([int(tss[i][2]),int(tts[i][2])])
 	return (np.array(gene_pos), np.array(dom_pos))
@@ -88,7 +54,18 @@ def insertion(gene_pos, dom_pos, pos) :
 			if dom_pos[i][j] >= pos :
 				dom_pos[i][j] += 1
 
- 
+#Méthode deletion, delete une position aléatoire pos
+#Décale toutes les positions suivantes
+def deletion(gene_pos, dom_pos, pos) : 
+	for i in range(len(gene_pos)) :
+		for j in range(len(gene_pos[i])) :
+			if gene_pos[i][j] >= pos :
+				gene_pos[i][j] -= 1
+	for i in range(len(dom_pos)) :
+		for j in range(len(dom_pos[i])) :
+			if dom_pos[i][j] >= pos :
+				dom_pos[i][j] -= 1
+
  #pos1 < pos2
  #Les positions ne se trouvent pas dans les régions codantes
 def inversion(gene_pos, dom_pos, pos1, pos2) :
@@ -112,21 +89,6 @@ def inversion(gene_pos, dom_pos, pos1, pos2) :
 	
 	return (new_pos_gene, new_pos_dom)
 						
-
-
-#print(inversion(data, 9500, 19000))
-
-
-def deletion(gene_pos, dom_pos, pos) : 
-	for i in range(len(gene_pos)) :
-		for j in range(len(gene_pos[i])) :
-			if gene_pos[i][j] >= pos :
-				gene_pos[i][j] -= 1
-	for i in range(len(dom_pos)) :
-		for j in range(len(dom_pos[i])) :
-			if dom_pos[i][j] >= pos :
-				dom_pos[i][j] -= 1
-
 def randomPos(data) : 
 	deb = 1 
 	fin = data[9][3]
@@ -146,4 +108,3 @@ print()
 
 #print(randomPos(data))
 
->>>>>>> 1052a00256e926685094345020d6c5fc1fe127a8
