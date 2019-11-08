@@ -2,6 +2,7 @@
 import numpy as np
 import random
 import shutil
+import sys
 
 print('Ceci est notre code') 
 
@@ -51,8 +52,7 @@ def writeData(gene_pos, sens) :
 	f1.close()
 	f2.close()
 	
-#gene_pos, dom_poss, sens = loadData('tousgenesidentiques/TSS.dat', 'tousgenesidentiques/TTS.dat')
-writeData_init('tousgenesidentiques/TSS.dat', 'tousgenesidentiques/TTS.dat')
+
 
 #Ajoute un codon à une position définie dans le génome
 #Décale toutes les positions suivantes
@@ -75,18 +75,21 @@ def inversion(gene_pos, dom_pos, sens, pos1, pos2) :
 	new_sens = sens
 	#Verify that the genes are not cut in half
 	for i in range(len(gene_pos)):
-		if pos1 >= gene_pos[i,0] and pos1 <= gene_pos[i,0] or pos2 >= gene_pos[i,0] and pos2 <= gene_pos[i,0]:
-			print("impossible to cut the gene")
-			break
+		print('i : ', i)
+		print('gene position : ', gene_pos[i,0],gene_pos[i,1])
+		print('positions of mutations : ', pos1, pos2, '\n')
+		if pos1 >= gene_pos[i,0] and pos1 <= gene_pos[i,1] or pos2 >= gene_pos[i,0] and pos2 <= gene_pos[i,1]:
+			sys.exit('impossible to cut the gene')
 	#Change positions of domains
 	for i in range(len(dom_pos)) :
 		for j in range (len(dom_pos[i])) :
 			if dom_pos[i][j] > pos1 and dom_pos[i][j] < pos2 :
 				new_pos_dom.append(pos1 + pos2 - dom_pos[i][j])
-				print('previous dom_pos : ' + str(dom_pos[i][j]) + ' ; New dom_pos : ' + str(pos1 + pos2 - dom_pos[i][j]) + '\n')
+				#print('previous dom_pos : ' + str(dom_pos[i][j]) + ' ; New dom_pos : ' + str(pos1 + pos2 - dom_pos[i][j]) + '\n')
 			else :
 				new_pos_dom.append(dom_pos[i][j])
-				print('same dom_pos : ' + str(dom_pos[i][j])  + '\n')
+				#print('same dom_pos : ' + str(dom_pos[i][j])  + '\n')
+	print('\n')
 	#Change positions of genes
 	affected_genes = []
 	for i in range(len(gene_pos)) :
@@ -94,16 +97,28 @@ def inversion(gene_pos, dom_pos, sens, pos1, pos2) :
 			if gene_pos[i][j] > pos1 and gene_pos[i][j] < pos2 :
 				new_pos_gene.append(pos1 + pos2 - gene_pos[i][j])
 				affected_genes.append(i)
+				#print('previous gene_pos : ' + str(gene_pos[i][j]) + ' ; New gene_pos : ' + str(pos1 + pos2 - gene_pos[i][j]) + '\n')
 			else :
 				new_pos_gene.append(gene_pos[i][j])
-	affected_genes = np.unique(np.array(affected_genes)
+				#print('same gene_pos : ' + str(gene_pos[i][j])  + '\n')
+	
+	
+	affected_genes = np.unique(np.array(affected_genes))
+	print('\n', affected_genes)
 	#Change orientation of genes
 	to_invert = []
 	for i in affected_genes :
 		to_invert.append(sens[i])
 	inverted = np.flip(np.array(to_invert))
+	print(inverted)
 	for i in range(len(inverted)) :
-		new_sens[i] = inverted[i]
+		if inverted[i] == "+" :
+			inverted[i] = "-"
+		else :
+			inverted[i] = "+"
+	print(inverted)
+	for i in (affected_genes) :
+		new_sens[i] = inverted[i-affected_genes[0]]
 		
 	new_pos_dom = np.sort(np.array(new_pos_dom)).reshape(len(dom_pos), 2)
 	new_pos_gene = np.sort(np.array(new_pos_gene)).reshape(len(gene_pos), 2)
@@ -111,8 +126,6 @@ def inversion(gene_pos, dom_pos, sens, pos1, pos2) :
 	return (new_pos_gene, new_pos_dom, new_sens)
 						
 
-
-#print(inversion(data, 9500, 19000))
 
 
 def deletion(gene_pos, dom_pos, pos) : 
@@ -138,9 +151,15 @@ def randomPos(data) :
 	return pos
 
 
-gene_pos, dom_pos = inversion(gene_pos, dom_pos, 4300, 12500)
 
-print(gene_pos, '\n\n', dom_pos)
+writeData_init('tousgenesidentiques/TSS.dat', 'tousgenesidentiques/TTS.dat')
+gene_pos, dom_pos, sens = loadData('tousgenesidentiques/TSS.dat', 'tousgenesidentiques/TTS.dat')
+
+print(gene_pos, '\n\n', dom_pos, '\n\n', sens)
+
+gene_pos, dom_pos, sens = inversion(gene_pos, dom_pos, sens, 9265, 23872)
+
+print(gene_pos, '\n\n', dom_pos, '\n\n', sens)
 print()
 
 
