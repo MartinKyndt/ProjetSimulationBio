@@ -57,26 +57,46 @@ def insertion(gene_pos, dom_pos, pos) :
  
  #pos1 < pos2
  #Les positions ne se trouvent pas dans les régions codantes
-def inversion(gene_pos, dom_pos, pos1, pos2) :
+def inversion(gene_pos, dom_pos, sens, pos1, pos2) :
 	new_pos_gene = []
 	new_pos_dom = []
+	new_sens = sens
+	#Verify that the genes are not cut in half
+	for i in range(len(gene_pos)):
+		if pos1 >= gene_pos[i,0] and pos1 <= gene_pos[i,0] or pos2 >= gene_pos[i,0] and pos2 <= gene_pos[i,0]:
+			print("impossible to cut the gene")
+			break
+	#Change positions of domains
 	for i in range(len(dom_pos)) :
 		for j in range (len(dom_pos[i])) :
 			if dom_pos[i][j] > pos1 and dom_pos[i][j] < pos2 :
-				new_pos_dom.append(pos1 + pos2 - data[i][j])
+				new_pos_dom.append(pos1 + pos2 - dom_pos[i][j])
+				print('previous dom_pos : ' + str(dom_pos[i][j]) + ' ; New dom_pos : ' + str(pos1 + pos2 - dom_pos[i][j]) + '\n')
 			else :
-				new_pos_dom.append(data[i][j])
-					
+				new_pos_dom.append(dom_pos[i][j])
+				print('same dom_pos : ' + str(dom_pos[i][j])  + '\n')
+	#Change positions of genes
+	affected_genes = []
 	for i in range(len(gene_pos)) :
 		for j in range (len(gene_pos[i])) :
 			if gene_pos[i][j] > pos1 and gene_pos[i][j] < pos2 :
-				new_pos_dom.append(pos1 + pos2 - data[i][j])
+				new_pos_gene.append(pos1 + pos2 - gene_pos[i][j])
+				affected_genes.append(i)
 			else :
-				new_pos_dom.append(data[i][j])				
-	new_pos_dom = np.sort(np.array(new_pos_dom)).reshape(2, len(pos_dom))
-	new_pos_gene = np.sort(np.array(new_pos_gene)).reshape(2, len(pos_dom))
+				new_pos_gene.append(gene_pos[i][j])
+	affected_genes = np.unique(np.array(affected_genes)
+	#Change orientation of genes
+	to_invert = []
+	for i in affected_genes :
+		to_invert.append(sens[i])
+	inverted = np.flip(np.array(to_invert))
+	for i in range(len(inverted)) :
+		new_sens[i] = inverted[i]
+		
+	new_pos_dom = np.sort(np.array(new_pos_dom)).reshape(len(dom_pos), 2)
+	new_pos_gene = np.sort(np.array(new_pos_gene)).reshape(len(gene_pos), 2)
 	
-	return (new_pos_gene, new_pos_dom)
+	return (new_pos_gene, new_pos_dom, new_sens)
 						
 
 
@@ -109,6 +129,12 @@ gene_pos, dom_pos = loadData('tousgenesidentiques/TSS.dat', 'tousgenesidentiques
 
 print(gene_pos, dom_pos)
 print()
+
+gene_pos, dom_pos = inversion(gene_pos, dom_pos, 4300, 12500)
+
+print(gene_pos, '\n\n', dom_pos)
+print()
+
 
 #print(randomPos(data))
 
