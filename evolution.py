@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import numpy as np
 import random
+import shutil
 
 print('Ceci est notre code') 
 
@@ -10,6 +11,7 @@ print('Ceci est notre code')
 def loadData(TSS, TTS) : 
 	gene_pos = []
 	dom_pos = []
+	sens = []
 	f1 = open(TSS)
 	f2 = open(TTS)
 	tss = [[e for e in l[:-1].split('\t')] for l in f1.readlines()[1:]]
@@ -17,42 +19,52 @@ def loadData(TSS, TTS) :
 	for i in range(10) :
 		dom_pos.append([(3000*i)+1, 3000*(i+1)])
 		gene_pos.append([int(tss[i][2]),int(tts[i][2])])
-	return (np.array(gene_pos), np.array(dom_pos))
+		sens.append(tss[i][1])
+	return (np.array(gene_pos), np.array(dom_pos), np.array(sens))
 
-
-def writeData(gene_pos) :
-	f1 = open('TSSevol.dat', 'w')
-	f2 = open('TTSevol.dat', 'w')
+def writeData_init(TSS, TTS) :
+	f1 = open('tousgenesidentiques/TSSevol_prev.dat', 'w')
+	f2 = open('tousgenesidentiques/TTSevol_prev.dat', 'w')
+	f3 = open('tousgenesidentiques/TSSevol.dat', 'w')
+	f4 = open('tousgenesidentiques/TTSevol.dat', 'w')
+	f1.close()
+	f2.close()
+	f3.close()
+	f4.close()
+	shutil.copy(TSS,'tousgenesidentiques/TSSevol_prev.dat')
+	shutil.copy(TTS,'tousgenesidentiques/TTSevol_prev.dat')
+	shutil.copy(TSS,'tousgenesidentiques/TSSevol.dat')
+	shutil.copy(TTS,'tousgenesidentiques/TTSevol.dat')
+	
+def writeData(gene_pos, sens) :
+	f1 = open('tousgenesidentiques/TSSevol.dat', 'w')
+	f2 = open('tousgenesidentiques/TTSevol.dat', 'w')
 	f1.write('TUindex\tTUorient\tTTS_pos\tTTS_sstrength\n')
 	f2.write('TUindex\tTUorient\tTTS_pos\tTTS_proba_off\n')
 	for i in range(len(gene_pos)):
 		f1.write(str(i)+'\t')
 		f2.write(str(i)+'\t')
-		if gene_pos[i,0]<gene_pos[i,1]:
-			f1.write('+\t')
-			f2.write('+\t')
-		else:
-			f1.write('-\t')
-			f2.write('-\t')
+		f1.write(sens[i]+'\t')
+		f2.write(sens[i]+'\t')
 		f1.write(str(gene_pos[i,0])+'\t.2\n')
 		f2.write(str(gene_pos[i,1])+'\t1.\n')
 	f1.close()
 	f2.close()
 	
-gene_pos, dom_poss = loadData('tousgenesidentiques/TSS.dat', 'tousgenesidentiques/TTS.dat')
-writeData(gene_pos)
+#gene_pos, dom_poss, sens = loadData('tousgenesidentiques/TSS.dat', 'tousgenesidentiques/TTS.dat')
+writeData_init('tousgenesidentiques/TSS.dat', 'tousgenesidentiques/TTS.dat')
 
 #Ajoute un codon à une position définie dans le génome
 #Décale toutes les positions suivantes
 def insertion(gene_pos, dom_pos, pos) :
 	for i in range(len(gene_pos)) :
 		for j in range(len(gene_pos[i])) :
-			if gene_pos[i][j] >= pos :
-				gene_pos[i][j] += 1
+			if gene_pos[i,j] >= pos :
+				gene_pos[i,j] += 1
 	for i in range(len(dom_pos)) :
 		for j in range(len(dom_pos[i])) :
-			if dom_pos[i][j] >= pos :
-				dom_pos[i][j] += 1
+			if dom_pos[i,j] >= pos :
+				dom_pos[i,j] += 1
 
  
  #pos1 < pos2
@@ -86,12 +98,12 @@ def inversion(gene_pos, dom_pos, pos1, pos2) :
 def deletion(gene_pos, dom_pos, pos) : 
 	for i in range(len(gene_pos)) :
 		for j in range(len(gene_pos[i])) :
-			if gene_pos[i][j] >= pos :
-				gene_pos[i][j] -= 1
+			if gene_pos[i,j] >= pos :
+				gene_pos[i,j] -= 1
 	for i in range(len(dom_pos)) :
 		for j in range(len(dom_pos[i])) :
-			if dom_pos[i][j] >= pos :
-				dom_pos[i][j] -= 1
+			if dom_pos[i,j] >= pos :
+				dom_pos[i,j] -= 1
 
 def randomPos(data) : 
 	deb = 1 
@@ -105,10 +117,6 @@ def randomPos(data) :
 				count +=1 
 	return pos
 
-gene_pos, dom_pos = loadData('tousgenesidentiques/TSS.dat', 'tousgenesidentiques/TTS.dat') 
-
-print(gene_pos, dom_pos)
-print()
 
 #print(randomPos(data))
 
