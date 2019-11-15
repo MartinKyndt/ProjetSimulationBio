@@ -36,21 +36,21 @@ def writeData_init(TSS, TTS) :
 	shutil.copy(TTS,'tousgenesidentiques/TTSevol.dat')
 	
 def writeData(gene_pos, sens, inversion=False) :
-		shutil.copy('tousgenesidentiques/TSSevol.dat', 'tousgenesidentiques/TSSevol_prev.dat')
-		shutil.copy('tousgenesidentiques/TTSevol.dat', 'tousgenesidentiques/TTSevol_prev.dat')
-		f1 = open('tousgenesidentiques/TSSevol.dat', 'w')
-		f2 = open('tousgenesidentiques/TTSevol.dat', 'w')
-		f1.write('TUindex\tTUorient\tTTS_pos\tTTS_sstrength\n')
-		f2.write('TUindex\tTUorient\tTTS_pos\tTTS_proba_off\n')
-		for i in range(len(gene_pos)):
-			f1.write(str(i)+'\t')
-			f2.write(str(i)+'\t')
-			f1.write(sens[i]+'\t')
-			f2.write(sens[i]+'\t')
-			f1.write(str(gene_pos[i,0]+4)+'\t.2\n')
-			f2.write(str(gene_pos[i,1]+4)+'\t1.\n')
-		f1.close()
-		f2.close()
+	shutil.copy('tousgenesidentiques/TSSevol.dat', 'tousgenesidentiques/TSSevol_prev.dat')
+	shutil.copy('tousgenesidentiques/TTSevol.dat', 'tousgenesidentiques/TTSevol_prev.dat')
+	f1 = open('tousgenesidentiques/TSSevol.dat', 'w')
+	f2 = open('tousgenesidentiques/TTSevol.dat', 'w')
+	f1.write('TUindex\tTUorient\tTTS_pos\tTTS_sstrength\n')
+	f2.write('TUindex\tTUorient\tTTS_pos\tTTS_proba_off\n')
+	for i in range(len(gene_pos)):
+		f1.write(str(i)+'\t')
+		f2.write(str(i)+'\t')
+		f1.write(sens[i]+'\t')
+		f2.write(sens[i]+'\t')
+		f1.write(str(gene_pos[i,0]+4)+'\t.2\n')
+		f2.write(str(gene_pos[i,1]+4)+'\t1.\n')
+	f1.close()
+	f2.close()
 		
 def writeData_inversion():
 	shutil.copy('tousgenesidentiques/TSSevol_prev.dat', 'tousgenesidentiques/TSSevol.dat')
