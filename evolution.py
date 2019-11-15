@@ -87,6 +87,7 @@ def deletion(gene_pos, dom_pos, pos) :
 			if dom_pos[i][j] >= pos :
 				dom_pos[i][j] -= 1
 
+			
  #pos1 < pos2
  #Les positions ne se trouvent pas dans les régions codantes
 def inversion(gene_pos, dom_pos, sens, pos1, pos2) :
@@ -145,15 +146,7 @@ def inversion(gene_pos, dom_pos, sens, pos1, pos2) :
 	
 	return (new_pos_gene, new_pos_dom, new_sens)
 						
-def deletion(gene_pos, dom_pos, pos) : 
-	for i in range(len(gene_pos)) :
-		for j in range(len(gene_pos[i])) :
-			if gene_pos[i,j] >= pos :
-				gene_pos[i,j] -= 1
-	for i in range(len(dom_pos)) :
-		for j in range(len(dom_pos[i])) :
-			if dom_pos[i,j] >= pos :
-				dom_pos[i,j] -= 1
+
 
 def randomPos(data) : 
 	deb = 1 
