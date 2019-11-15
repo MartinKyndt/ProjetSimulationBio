@@ -90,8 +90,15 @@ def deletion(gene_pos, dom_pos) :
 				dom_pos[i][j] -= 1
 
  #pos1 < pos2
- #Les positions ne se trouvent pas dans les régions codantes
-def inversion(gene_pos, dom_pos, sens, pos1, pos2) :
+def inversion(gene_pos, dom_pos, sens) :
+
+	pos1 = randomPos(dom_pos, gene_pos)
+	pos2 = randomPos(dom_pos, gene_pos)
+	pos11 = min(pos1, pos2)
+	pos22 = max(pos1, pos2)
+	pos1 = pos11
+	pos2 = pos22
+	
 	new_pos_gene = []
 	new_pos_dom = []
 	new_sens = sens
@@ -165,7 +172,7 @@ def deletion(gene_pos, dom_pos) :
 
 
 
-
+#Les positions ne se trouvent pas dans les régions codantes
 def randomPos(dom_pos, gene_pos) : 
 	deb = dom_pos[0,0]
 	fin = dom_pos[-1,0]
@@ -179,7 +186,7 @@ def randomPos(dom_pos, gene_pos) :
 					cond = True
 			if(pos > gene_pos[i-1][1] and pos < gene_pos[i][0]) : 
 				cond = True
-	print(pos)
+	print("position for inversion", pos)
 	return pos
 
 
@@ -189,11 +196,7 @@ gene_pos, dom_pos, sens = loadData('tousgenesidentiques/TSS.dat', 'tousgenesiden
 
 print(gene_pos, '\n\n', dom_pos, '\n\n', sens)
 
-pos1 = randomPos(dom_pos, gene_pos)
-pos2 = randomPos(dom_pos, gene_pos)
-pos11 = min(pos1, pos2)
-pos22 = max(pos1, pos2)
-gene_pos, dom_pos, sens = inversion(gene_pos, dom_pos, sens, pos11, pos22)
+gene_pos, dom_pos, sens = inversion(gene_pos, dom_pos, sens)
 
 print(gene_pos, '\n\n', dom_pos, '\n\n', sens)
 
