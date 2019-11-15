@@ -206,9 +206,17 @@ def fitness(result, expected) :
 	
 	return(fitness)
 	
+	
 ################
 #TESTS METHODES#
 ################
+
+def main(argv) 
+#bimbimbibm 
+
+if __name__ == "__main__" : 
+#boumboumboum 
+	main(sys.argv[1]) 
 
 writeData_init('tousgenesidentiques/TSS.dat', 'tousgenesidentiques/TTS.dat')
 gene_pos, dom_pos, sens = loadData('tousgenesidentiques/TSS.dat', 'tousgenesidentiques/TTS.dat')
