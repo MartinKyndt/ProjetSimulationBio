@@ -6,6 +6,9 @@ import sys
 
 print('Ceci est notre code') 
 
+####################################
+#ECRITURE ET LA LECTURE DE FICHIERS#
+####################################
 
 #Ecrit les données TSS et TTS dans l'ordre : 
 #debut de domaine, debut de gene, fin de gene, fin de domaine
@@ -63,6 +66,11 @@ def writeData_inversion():
 #writeData_inversion()
 
 
+#########################
+#EVENEMENTS DE MUTATIONS#
+#########################
+
+
 #Ajoute un codon à une position définie dans le génome
 #Décale toutes les positions suivantes
 def insertion(gene_pos, dom_pos, pos) :
@@ -75,6 +83,8 @@ def insertion(gene_pos, dom_pos, pos) :
 		for j in range(len(dom_pos[i])) :
 			if dom_pos[i,j] >= pos :
 				dom_pos[i,j] += 1
+				
+				
 
 #Méthode deletion, delete une position aléatoire pos
 #Décale toutes les positions suivantes
@@ -89,6 +99,8 @@ def deletion(gene_pos, dom_pos) :
 			if dom_pos[i][j] >= pos :
 				dom_pos[i][j] -= 1
 
+			
+			
 			
  #pos1 < pos2
 def inversion(gene_pos, dom_pos, sens) :
@@ -150,6 +162,10 @@ def inversion(gene_pos, dom_pos, sens) :
 	
 	return (new_pos_gene, new_pos_dom, new_sens)
 
+##############################################
+#CHOIX D'UNE POSITION ALEATOIRE POUR MUTATION#
+##############################################
+
 #Les positions ne se trouvent pas dans les régions codantes
 def randomPos(dom_pos, gene_pos) : 
 	deb = dom_pos[0,0]
@@ -166,6 +182,12 @@ def randomPos(dom_pos, gene_pos) :
 				cond = True
 	print("position for inversion", pos)
 	return pos
+	
+	
+#########
+#FITNESS#
+#########
+
 
 def fitness(result, expected) : 
 	obs = [] 
@@ -184,7 +206,9 @@ def fitness(result, expected) :
 	
 	return(fitness)
 	
-
+################
+#TESTS METHODES#
+################
 
 writeData_init('tousgenesidentiques/TSS.dat', 'tousgenesidentiques/TTS.dat')
 gene_pos, dom_pos, sens = loadData('tousgenesidentiques/TSS.dat', 'tousgenesidentiques/TTS.dat')
