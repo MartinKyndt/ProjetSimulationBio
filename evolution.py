@@ -66,6 +66,7 @@ def writeData_inversion():
 #Ajoute un codon à une position définie dans le génome
 #Décale toutes les positions suivantes
 def insertion(gene_pos, dom_pos, pos) :
+	
 	for i in range(len(gene_pos)) :
 		for j in range(len(gene_pos[i])) :
 			if gene_pos[i,j] >= pos :
@@ -77,7 +78,8 @@ def insertion(gene_pos, dom_pos, pos) :
 
 #Méthode deletion, delete une position aléatoire pos
 #Décale toutes les positions suivantes
-def deletion(gene_pos, dom_pos, pos) : 
+def deletion(gene_pos, dom_pos) : 
+	pos = randomPos(gene_pos, dom_pos)
 	for i in range(len(gene_pos)) :
 		for j in range(len(gene_pos[i])) :
 			if gene_pos[i][j] >= pos :
@@ -95,9 +97,9 @@ def inversion(gene_pos, dom_pos, sens, pos1, pos2) :
 	new_sens = sens
 	#Verify that the genes are not cut in half
 	for i in range(len(gene_pos)):
-		print('i : ', i)
-		print('gene position : ', gene_pos[i,0],gene_pos[i,1])
-		print('positions of mutations : ', pos1, pos2, '\n')
+		"""print('i : ', i)
+		#print('gene position : ', gene_pos[i,0],gene_pos[i,1])
+		#print('positions of mutations : ', pos1, pos2, '\n')"""
 		if pos1 >= gene_pos[i,0] and pos1 <= gene_pos[i,1] or pos2 >= gene_pos[i,0] and pos2 <= gene_pos[i,1]:
 			sys.exit('impossible to cut the gene')
 	#Change positions of domains
@@ -105,10 +107,10 @@ def inversion(gene_pos, dom_pos, sens, pos1, pos2) :
 		for j in range (len(dom_pos[i])) :
 			if dom_pos[i][j] > pos1 and dom_pos[i][j] < pos2 :
 				new_pos_dom.append(pos1 + pos2 - dom_pos[i][j])
-				#print('previous dom_pos : ' + str(dom_pos[i][j]) + ' ; New dom_pos : ' + str(pos1 + pos2 - dom_pos[i][j]) + '\n')
+				"""print('previous dom_pos : ' + str(dom_pos[i][j]) + ' ; New dom_pos : ' + str(pos1 + pos2 - dom_pos[i][j]) + '\n')"""
 			else :
 				new_pos_dom.append(dom_pos[i][j])
-				#print('same dom_pos : ' + str(dom_pos[i][j])  + '\n')
+				"""print('same dom_pos : ' + str(dom_pos[i][j])  + '\n')"""
 	print('\n')
 	#Change positions of genes
 	affected_genes = []
@@ -117,10 +119,10 @@ def inversion(gene_pos, dom_pos, sens, pos1, pos2) :
 			if gene_pos[i][j] > pos1 and gene_pos[i][j] < pos2 :
 				new_pos_gene.append(pos1 + pos2 - gene_pos[i][j])
 				affected_genes.append(i)
-				#print('previous gene_pos : ' + str(gene_pos[i][j]) + ' ; New gene_pos : ' + str(pos1 + pos2 - gene_pos[i][j]) + '\n')
+				"""print('previous gene_pos : ' + str(gene_pos[i][j]) + ' ; New gene_pos : ' + str(pos1 + pos2 - gene_pos[i][j]) + '\n')"""
 			else :
 				new_pos_gene.append(gene_pos[i][j])
-				#print('same gene_pos : ' + str(gene_pos[i][j])  + '\n')
+				"""print('same gene_pos : ' + str(gene_pos[i][j])  + '\n')"""
 	
 	
 	affected_genes = np.unique(np.array(affected_genes))
@@ -144,8 +146,13 @@ def inversion(gene_pos, dom_pos, sens, pos1, pos2) :
 	new_pos_gene = np.sort(np.array(new_pos_gene)).reshape(len(gene_pos), 2)
 	
 	return (new_pos_gene, new_pos_dom, new_sens)
-						
-def deletion(gene_pos, dom_pos, pos) : 
+			
+			
+			
+			
+
+def deletion(gene_pos, dom_pos) :
+	pos = randomPos(gene_pos, dom_pos)
 	for i in range(len(gene_pos)) :
 		for j in range(len(gene_pos[i])) :
 			if gene_pos[i,j] >= pos :
@@ -155,16 +162,24 @@ def deletion(gene_pos, dom_pos, pos) :
 			if dom_pos[i,j] >= pos :
 				dom_pos[i,j] -= 1
 
-def randomPos(data) : 
-	deb = 1 
-	fin = data[9][3]
+
+
+
+
+def randomPos(dom_pos, gene_pos) : 
+	deb = dom_pos[0,0]
+	fin = dom_pos[-1,0]
 	count = 0
-	while(count != 10) : 
-		count = 0
+	cond = False
+	while(not cond) : 
 		pos = random.randint(deb,fin)
-		for i in range(len(data)): 
-			if(pos < data[i][0] & pos > data[i][1]) : 
-				count +=1 
+		for i in range(len(gene_pos)):
+			if i == 0 :
+				if(pos < gene_pos[i,0]) :
+					cond = True
+			if(pos > gene_pos[i-1][1] and pos < gene_pos[i][0]) : 
+				cond = True
+	print(pos)
 	return pos
 
 
@@ -174,11 +189,12 @@ gene_pos, dom_pos, sens = loadData('tousgenesidentiques/TSS.dat', 'tousgenesiden
 
 print(gene_pos, '\n\n', dom_pos, '\n\n', sens)
 
-gene_pos, dom_pos, sens = inversion(gene_pos, dom_pos, sens, 9265, 23872)
+pos1 = randomPos(dom_pos, gene_pos)
+pos2 = randomPos(dom_pos, gene_pos)
+pos11 = min(pos1, pos2)
+pos22 = max(pos1, pos2)
+gene_pos, dom_pos, sens = inversion(gene_pos, dom_pos, sens, pos11, pos22)
 
 print(gene_pos, '\n\n', dom_pos, '\n\n', sens)
-print()
 
-
-#print(randomPos(data))
 
