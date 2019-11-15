@@ -91,14 +91,12 @@ def deletion(gene_pos, dom_pos) :
 
  #pos1 < pos2
 def inversion(gene_pos, dom_pos, sens) :
-
 	pos1 = randomPos(dom_pos, gene_pos)
 	pos2 = randomPos(dom_pos, gene_pos)
 	pos11 = min(pos1, pos2)
 	pos22 = max(pos1, pos2)
 	pos1 = pos11
 	pos2 = pos22
-	
 	new_pos_gene = []
 	new_pos_dom = []
 	new_sens = sens
@@ -118,7 +116,6 @@ def inversion(gene_pos, dom_pos, sens) :
 			else :
 				new_pos_dom.append(dom_pos[i][j])
 				"""print('same dom_pos : ' + str(dom_pos[i][j])  + '\n')"""
-	print('\n')
 	#Change positions of genes
 	affected_genes = []
 	for i in range(len(gene_pos)) :
@@ -130,11 +127,9 @@ def inversion(gene_pos, dom_pos, sens) :
 			else :
 				new_pos_gene.append(gene_pos[i][j])
 				"""print('same gene_pos : ' + str(gene_pos[i][j])  + '\n')"""
-	
-	
+	#Change orientation of genes
 	affected_genes = np.unique(np.array(affected_genes))
 	print('\n', affected_genes)
-	#Change orientation of genes
 	to_invert = []
 	for i in affected_genes :
 		to_invert.append(sens[i])
