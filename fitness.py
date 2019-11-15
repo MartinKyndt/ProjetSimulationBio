@@ -1,6 +1,6 @@
 import numpy as np
 import math
-
+from random import *
 
 def fitness(result, expected) : 
 	obs = [] 
@@ -19,5 +19,27 @@ def fitness(result, expected) :
 	
 	return(fitness)
 	
-#print(fitness("result.dat","cible.dat")) 
 
+print(fitness("result.dat","cible.dat")) 
+
+
+#def iter(seuils) : 
+#	prob = random() 
+	
+#	if(prob < seuil[0]) #insertion
+#	elif(prob < seuil[1]) #délétion 
+#	else #invertion 
+	
+#	#writeData 
+	
+def checkFitness(event) :
+	newfitness = fitness("result.dat","cible.dat")
+	f = open("fitness.dat", 'r') 
+	t = [[e for e in l[:-1].split(':')] for l in f.readlines()[0:]] 
+	f = open("fitness.dat", 'a') 
+	if(newfitness > float(t[len(t)-1][1])) : 
+		f.write(event + '\t') 
+
+		
+	
+checkFitness('Test')
