@@ -89,6 +89,7 @@ def deletion(gene_pos, dom_pos) :
 			if dom_pos[i][j] >= pos :
 				dom_pos[i][j] -= 1
 
+			
  #pos1 < pos2
 def inversion(gene_pos, dom_pos, sens) :
 	pos1 = randomPos(dom_pos, gene_pos)
@@ -148,24 +149,6 @@ def inversion(gene_pos, dom_pos, sens) :
 	new_pos_gene = np.sort(np.array(new_pos_gene)).reshape(len(gene_pos), 2)
 	
 	return (new_pos_gene, new_pos_dom, new_sens)
-			
-			
-			
-			
-
-def deletion(gene_pos, dom_pos) :
-	pos = randomPos(gene_pos, dom_pos)
-	for i in range(len(gene_pos)) :
-		for j in range(len(gene_pos[i])) :
-			if gene_pos[i,j] >= pos :
-				gene_pos[i,j] -= 1
-	for i in range(len(dom_pos)) :
-		for j in range(len(dom_pos[i])) :
-			if dom_pos[i,j] >= pos :
-				dom_pos[i,j] -= 1
-
-
-
 
 #Les positions ne se trouvent pas dans les régions codantes
 def randomPos(dom_pos, gene_pos) : 
@@ -184,6 +167,23 @@ def randomPos(dom_pos, gene_pos) :
 	print("position for inversion", pos)
 	return pos
 
+def fitness(result, expected) : 
+	obs = [] 
+	cible = [] 
+	f1 = open(result)
+	f2 = open(expected)
+	t = [[e for e in l[:-1].split()] for l in f1.readlines()[0:]]
+	tt = [[e for e in l[:-1].split()] for l in f2.readlines()[0:]] 
+	for i in range(10) :
+		obs.append(int(t[i][4]))
+		cible.append(int(tt[i][4]))
+	
+	fitness = 0 
+	for i in range(10) : 
+		fitness += math.log(obs[i]/cible[i])
+	
+	return(fitness)
+	
 
 
 writeData_init('tousgenesidentiques/TSS.dat', 'tousgenesidentiques/TTS.dat')
