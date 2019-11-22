@@ -6,6 +6,9 @@ import sys
 
 print('Ceci est notre code') 
 
+####################################
+#ECRITURE ET LA LECTURE DE FICHIERS#
+####################################
 
 #Ecrit les données TSS et TTS dans l'ordre : 
 #debut de domaine, debut de gene, fin de gene, fin de domaine
@@ -63,6 +66,11 @@ def writeData_inversion():
 #writeData_inversion()
 
 
+#########################
+#EVENEMENTS DE MUTATIONS#
+#########################
+
+
 #Ajoute un codon à une position définie dans le génome
 #Décale toutes les positions suivantes
 def insertion(gene_pos, dom_pos, pos) :
@@ -75,6 +83,8 @@ def insertion(gene_pos, dom_pos, pos) :
 		for j in range(len(dom_pos[i])) :
 			if dom_pos[i,j] >= pos :
 				dom_pos[i,j] += 1
+				
+				
 
 #Méthode deletion, delete une position aléatoire pos
 #Décale toutes les positions suivantes
@@ -90,16 +100,16 @@ def deletion(gene_pos, dom_pos) :
 				dom_pos[i][j] -= 1
 
 			
+			
+			
  #pos1 < pos2
 def inversion(gene_pos, dom_pos, sens) :
-
 	pos1 = randomPos(dom_pos, gene_pos)
 	pos2 = randomPos(dom_pos, gene_pos)
 	pos11 = min(pos1, pos2)
 	pos22 = max(pos1, pos2)
 	pos1 = pos11
 	pos2 = pos22
-	
 	new_pos_gene = []
 	new_pos_dom = []
 	new_sens = sens
@@ -119,7 +129,6 @@ def inversion(gene_pos, dom_pos, sens) :
 			else :
 				new_pos_dom.append(dom_pos[i][j])
 				"""print('same dom_pos : ' + str(dom_pos[i][j])  + '\n')"""
-	print('\n')
 	#Change positions of genes
 	affected_genes = []
 	for i in range(len(gene_pos)) :
@@ -131,11 +140,9 @@ def inversion(gene_pos, dom_pos, sens) :
 			else :
 				new_pos_gene.append(gene_pos[i][j])
 				"""print('same gene_pos : ' + str(gene_pos[i][j])  + '\n')"""
-	
-	
+	#Change orientation of genes
 	affected_genes = np.unique(np.array(affected_genes))
 	print('\n', affected_genes)
-	#Change orientation of genes
 	to_invert = []
 	for i in affected_genes :
 		to_invert.append(sens[i])
@@ -155,6 +162,10 @@ def inversion(gene_pos, dom_pos, sens) :
 	
 	return (new_pos_gene, new_pos_dom, new_sens)
 
+##############################################
+#CHOIX D'UNE POSITION ALEATOIRE POUR MUTATION#
+##############################################
+
 #Les positions ne se trouvent pas dans les régions codantes
 def randomPos(dom_pos, gene_pos) : 
 	deb = dom_pos[0,0]
@@ -171,6 +182,12 @@ def randomPos(dom_pos, gene_pos) :
 				cond = True
 	print("position for inversion", pos)
 	return pos
+	
+	
+#########
+#FITNESS#
+#########
+
 
 def fitness(result, expected) : 
 	obs = [] 
@@ -189,7 +206,17 @@ def fitness(result, expected) :
 	
 	return(fitness)
 	
+	
+################
+#TESTS METHODES#
+################
 
+def main(argv) 
+#bimbimbibm 
+
+if __name__ == "__main__" : 
+#boumboumboum 
+	main(sys.argv[1]) 
 
 writeData_init('tousgenesidentiques/TSS.dat', 'tousgenesidentiques/TTS.dat')
 gene_pos, dom_pos, sens = loadData('tousgenesidentiques/TSS.dat', 'tousgenesidentiques/TTS.dat')
