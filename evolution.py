@@ -4,8 +4,6 @@ import random
 import shutil
 import sys
 
-print('Ceci est notre code') 
-
 ####################################
 #ECRITURE ET LA LECTURE DE FICHIERS#
 ####################################
@@ -55,15 +53,9 @@ def writeData(gene_pos, sens, inversion=False) :
 	f1.close()
 	f2.close()
 		
-def writeData_inversion():
+def writeData_previous():
 	shutil.copy('tousgenesidentiques/TSSevol_prev.dat', 'tousgenesidentiques/TSSevol.dat')
 	shutil.copy('tousgenesidentiques/TTSevol_prev.dat', 'tousgenesidentiques/TTSevol.dat')
-	
-
-#writeData_init('tousgenesidentiques/TSS.dat', 'tousgenesidentiques/TTS.dat')	
-#gene_pos, dom_poss, sens = loadData('tousgenesidentiques/TSSevol.dat', 'tousgenesidentiques/TTSevol.dat')
-#writeData(gene_pos, sens)
-#writeData_inversion()
 
 
 #########################
@@ -211,20 +203,19 @@ def fitness(result, expected) :
 #TESTS METHODES#
 ################
 
-def main(argv) 
-#bimbimbibm 
-
+def main(argv)
+		
 if __name__ == "__main__" : 
 #boumboumboum 
 	main(sys.argv[1]) 
 
-writeData_init('tousgenesidentiques/TSS.dat', 'tousgenesidentiques/TTS.dat')
-gene_pos, dom_pos, sens = loadData('tousgenesidentiques/TSS.dat', 'tousgenesidentiques/TTS.dat')
+#writeData_init('tousgenesidentiques/TSS.dat', 'tousgenesidentiques/TTS.dat')
+#gene_pos, dom_pos, sens = loadData('tousgenesidentiques/TSS.dat', 'tousgenesidentiques/TTS.dat')
 
-print(gene_pos, '\n\n', dom_pos, '\n\n', sens)
+#print(gene_pos, '\n\n', dom_pos, '\n\n', sens)
 
-gene_pos, dom_pos, sens = inversion(gene_pos, dom_pos, sens)
+#gene_pos, dom_pos, sens = inversion(gene_pos, dom_pos, sens)
 
-print(gene_pos, '\n\n', dom_pos, '\n\n', sens)
+#print(gene_pos, '\n\n', dom_pos, '\n\n', sens)
 
 
