@@ -263,12 +263,12 @@ if __name__ == "__main__" :
 	for line in events :
 		all_events = line.split(',')
 		all_events.pop()
-		print(all_events)
 		events_tab = [int(i) for i in all_events]
-	print(events_tab)
 	x = np.arange(len(events_tab))
 	plt.plot(x, events_tab)
 	plt.show()
+
 	print(gene_pos, '\n\n', dom_pos, '\n\n', sens)
+	
 
 
