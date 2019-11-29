@@ -195,6 +195,21 @@ def randomPos(dom_pos, gene_pos) :
 					cond = False
 	return pos
 	
+def random_event(PARAMS, dom_pos, gene_pos, sens) :
+	#pdb.set_trace()
+	FILENAME = "all_events_{}.txt".format(PARAMS) #Différent nom de fichier pour chaque set de paramètres
+	f = open(FILENAME, 'a')
+	choice = random.random()
+	if choice <= 1/3 :
+		insertion(dom_pos, gene_pos)
+		f.write("0,")
+	elif choice >1/3 and choice <= 2/3 :
+		deletion(dom_pos, gene_pos)
+		f.write("1,")
+	else :
+		inversion(dom_pos, gene_pos, sens)
+		f.write("2,")
+	f.close()
 	
 #########
 #FITNESS#
@@ -218,8 +233,6 @@ def fitness(result, expected) :
 		fitness += math.log(obs[i]/cible[i])
 	return(fitness)
 	
-
-<<<<<<< HEAD
 def majFitness(event, q) :
 	newfitness = fitness("result.dat","cible.dat")
 	f = open("fitness.dat", 'r') 
@@ -227,24 +240,6 @@ def majFitness(event, q) :
 	print(t)
 	f2 = open("fitness.dat", 'a') 
 	new = False
-=======
-
-def random_event(PARAMS, dom_pos, gene_pos, sens) :
-	#pdb.set_trace()
-	FILENAME = "all_events_{}.txt".format(PARAMS) #Différent nom de fichier pour chaque set de paramètres
-	f = open(FILENAME, 'a')
-	choice = random.random()
-	if choice <= 1/3 :
-		insertion(dom_pos, gene_pos)
-		f.write("0,")
-	elif choice >1/3 and choice <= 2/3 :
-		deletion(dom_pos, gene_pos)
-		f.write("1,")
-	else :
-		inversion(dom_pos, gene_pos, sens)
-		f.write("2,")
-	f.close()
->>>>>>> caa46df59522dea5bea1ae394e302625c1ed60bc
 	
 	if(newfitness > float(t[len(t)-1][1])) : 
 		f2.write('\n' + event + ':' + str(newfitness)) 
@@ -263,15 +258,10 @@ def random_event(PARAMS, dom_pos, gene_pos, sens) :
 #TESTS METHODES#
 ################
 
-<<<<<<< HEAD
+
 def main(argv) : 
-=======
-#def main(argv) 
->>>>>>> caa46df59522dea5bea1ae394e302625c1ed60bc
-#bimbimbibm 
-	
-	if(argv == 1) : 
-		
+#bimbimbibm 	
+
 		
 
 if __name__ == "__main__" : 
