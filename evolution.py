@@ -5,6 +5,7 @@ import shutil
 import sys
 import pdb
 import matplotlib.pyplot as plt
+from TwisTranscripT.TSC import *
 
 
 print('Ceci est notre code') 
@@ -192,21 +193,24 @@ def randomPos(dom_pos, gene_pos) :
 					cond = False
 	return pos
 	
-def random_event(PARAMS, dom_pos, gene_pos, sens) :
+def random_event(PARAMS, dom_pos, gene_pos, sens, q, fileFitness) :
 	#pdb.set_trace()
 	FILENAME = "all_events_{}.txt".format(PARAMS) #Différent nom de fichier pour chaque set de paramètres
 	f = open(FILENAME, 'a')
 	choice = random.random()
 	if choice <= 1/3 :
 		insertion(dom_pos, gene_pos)
-		f.write("0,")
+		event = "Insertion"
 	elif choice >1/3 and choice <= 2/3 :
 		deletion(dom_pos, gene_pos)
-		f.write("1,")
+		event = "Deletion"
 	else :
 		inversion(dom_pos, gene_pos, sens)
-		f.write("2,")
+		event = "Inversion"
+	f.write(event)
 	f.close()
+	start_transcribing('params.ini')
+	majFitness(fileFitness, event ,q)
 	
 #########
 #FITNESS#
@@ -230,24 +234,23 @@ def fitness(result, expected) :
 		fitness += math.log(obs[i]/cible[i])
 	return(fitness)
 	
-def majFitness(event, q) :
-	newfitness = fitness("result.dat","cible.dat")
-	f = open("fitness.dat", 'r') 
+def majFitness(fileFitness ,PARAMS, event, q) :
+	newfitness = fitness('output/all_tr_info.csv',"cible.dat")
+	f = open(fileFitness, 'r') 
 	t = [[e for e in l[:-1].split(':')] for l in f.readlines()[0:]] 
-	print(t)
-	f2 = open("fitness.dat", 'a') 
-	new = False
+	f2 = open(fileFitness, 'a') 
 	
 	if(newfitness > float(t[len(t)-1][1])) : 
 		f2.write('\n' + event + ':' + str(newfitness)) 
-		new = True
-		
+
 	else : 
 		perte = float(t[len(t)-1][1]) - newfitness 
-		print(math.exp(-perte/q))
 		if(math.exp(-perte/q) < 0.5)  : 
-			f2.write('\n' + event + ':' + str(newfitness)) 
-			new = True
+			f2.write('\n' + event + ':' + str(newfitness))  
+		else : 
+			writeData_return()
+
+	return new
 
 		
 		
@@ -255,16 +258,8 @@ def majFitness(event, q) :
 #TESTS METHODES#
 ################
 
-
-def main(argv) : 
+def main() : 
 #bimbimbibm 	
-
-		
-
-if __name__ == "__main__" : 
-#boumboumboum 
-	#main(sys.argv[1])
-
 	PARAMS = "abc"
 	FILENAME = "all_events_{}.txt".format(PARAMS)
 
@@ -289,4 +284,11 @@ if __name__ == "__main__" :
 	print(gene_pos, '\n\n', dom_pos, '\n\n', sens)
 
 
+
+		
+
+if __name__ == "__main__" : 
+#boumboumboum 
+	main()
+	
 
