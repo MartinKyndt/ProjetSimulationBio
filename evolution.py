@@ -194,25 +194,50 @@ def fitness(result, expected) :
 	cible = [] 
 	f1 = open(result)
 	f2 = open(expected)
-	t = [[e for e in l[:-1].split()] for l in f1.readlines()[0:]]
+	t = [[e for e in l[:-1].split('\t')] for l in f1.readlines()[0:]]
+	print(t)
 	tt = [[e for e in l[:-1].split()] for l in f2.readlines()[0:]] 
+	print(t[9][5])
 	for i in range(10) :
-		obs.append(int(t[i][4]))
 		cible.append(int(tt[i][4]))
-	
+		obs.append(int(t[i+1][7]))
 	fitness = 0 
 	for i in range(10) : 
 		fitness += math.log(obs[i]/cible[i])
-	
 	return(fitness)
 	
+
+def majFitness(event, q) :
+	newfitness = fitness("result.dat","cible.dat")
+	f = open("fitness.dat", 'r') 
+	t = [[e for e in l[:-1].split(':')] for l in f.readlines()[0:]] 
+	print(t)
+	f2 = open("fitness.dat", 'a') 
+	new = False
 	
+	if(newfitness > float(t[len(t)-1][1])) : 
+		f2.write('\n' + event + ':' + str(newfitness)) 
+		new = True
+		
+	else : 
+		perte = float(t[len(t)-1][1]) - newfitness 
+		print(math.exp(-perte/q))
+		if(math.exp(-perte/q) < 0.5)  : 
+			f2.write('\n' + event + ':' + str(newfitness)) 
+			new = True
+
+		
+		
 ################
 #TESTS METHODES#
 ################
 
-def main(argv) 
+def main(argv) : 
 #bimbimbibm 
+	
+	if(argv == 1) : 
+		
+		
 
 if __name__ == "__main__" : 
 #boumboumboum 
