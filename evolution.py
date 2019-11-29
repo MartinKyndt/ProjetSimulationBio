@@ -178,21 +178,26 @@ def inversion(dom_pos, gene_pos, sens) :
 #Les positions ne se trouvent pas dans les régions codantes
 def randomPos(dom_pos, gene_pos) : 
 	deb = dom_pos[0,0]
-	fin = dom_pos[-1,0]
+	fin = dom_pos[-1,1]
 	count = 0
 	cond = False
 	while(not cond) : 
 		pos = random.randint(deb,fin)
 		for i in range(len(gene_pos)):
 			if i == 0 :
-				if(pos < gene_pos[i,0]) :
+				if(pos < gene_pos[i,0] - 60) : #Distance de sécurité à gauche du premier gène
 					cond = True
-			if(pos > gene_pos[i-1][1] and pos < gene_pos[i][0]) : 
+			if(pos > gene_pos[i-1][1] + 60 and pos < gene_pos[i][0] - 60) : #Distance de sécurité entre deux gènes
 				cond = True
+			if i == len(gene_pos)-1 :
+				if pos > gene_pos[i,1] + 60 :
+					cond = True
 		for i in range(len(dom_pos)) : #Refuse mutations at the exact positions of barriers
 			for j in range(len(dom_pos[i])) :
 				if pos == dom_pos[i, j] :
 					cond = False
+	if pos > 29000 :
+		print(pos)
 	return pos
 	
 	
@@ -211,7 +216,6 @@ def fitness(result, expected) :
 	for i in range(10) :
 		obs.append(int(t[i][4]))
 		cible.append(int(tt[i][4]))
-	
 	fitness = 0 
 	for i in range(10) : 
 		fitness += math.log(obs[i]/cible[i])
@@ -257,7 +261,8 @@ if __name__ == "__main__" :
 	events = open(FILENAME, 'w')
 	events.close()
 	for i in range(1000) :
-		print(i)
+		if i in [k*100 for k in range (int(1000/100))] :
+			print(i)
 		random_event(PARAMS, dom_pos, gene_pos, sens)
 	events = open(FILENAME, 'r')
 	for line in events :
