@@ -3,6 +3,9 @@ import numpy as np
 import random
 import shutil
 import sys
+import pdb
+import matplotlib.pyplot as plt
+
 
 print('Ceci est notre code') 
 
@@ -24,7 +27,7 @@ def loadData(TSS, TTS) :
 		dom_pos.append([(3000*i)+1, 3000*(i+1)])
 		gene_pos.append([int(tss[i][2]),int(tts[i][2])])
 		sens.append(tss[i][1])
-	return (np.array(gene_pos), np.array(dom_pos), np.array(sens))
+	return (np.array(dom_pos), np.array(gene_pos), np.array(sens))
 
 def writeData_init(TSS, TTS) :
 	f1 = open('tousgenesidentiques/TSSevol_prev.dat', 'w')
@@ -61,7 +64,7 @@ def writeData_inversion():
 	
 
 #writeData_init('tousgenesidentiques/TSS.dat', 'tousgenesidentiques/TTS.dat')	
-#gene_pos, dom_poss, sens = loadData('tousgenesidentiques/TSSevol.dat', 'tousgenesidentiques/TTSevol.dat')
+#dom_pos, gene_pos, sens = loadData('tousgenesidentiques/TSSevol.dat', 'tousgenesidentiques/TTSevol.dat')
 #writeData(gene_pos, sens)
 #writeData_inversion()
 
@@ -71,10 +74,16 @@ def writeData_inversion():
 #########################
 
 
+#
+
+#Inclure une distance de sécurité de 60 nt autour des régions codantes
+
+#
+
 #Ajoute un codon à une position définie dans le génome
 #Décale toutes les positions suivantes
-def insertion(gene_pos, dom_pos, pos) :
-	
+def insertion(dom_pos, gene_pos) :
+	pos = randomPos(dom_pos, gene_pos)
 	for i in range(len(gene_pos)) :
 		for j in range(len(gene_pos[i])) :
 			if gene_pos[i,j] >= pos :
@@ -88,8 +97,8 @@ def insertion(gene_pos, dom_pos, pos) :
 
 #Méthode deletion, delete une position aléatoire pos
 #Décale toutes les positions suivantes
-def deletion(gene_pos, dom_pos) : 
-	pos = randomPos(gene_pos, dom_pos)
+def deletion(dom_pos, gene_pos) : 
+	pos = randomPos(dom_pos, gene_pos)
 	for i in range(len(gene_pos)) :
 		for j in range(len(gene_pos[i])) :
 			if gene_pos[i][j] >= pos :
@@ -103,7 +112,7 @@ def deletion(gene_pos, dom_pos) :
 			
 			
  #pos1 < pos2
-def inversion(gene_pos, dom_pos, sens) :
+def inversion(dom_pos, gene_pos, sens) :
 	pos1 = randomPos(dom_pos, gene_pos)
 	pos2 = randomPos(dom_pos, gene_pos)
 	pos11 = min(pos1, pos2)
@@ -142,18 +151,18 @@ def inversion(gene_pos, dom_pos, sens) :
 				"""print('same gene_pos : ' + str(gene_pos[i][j])  + '\n')"""
 	#Change orientation of genes
 	affected_genes = np.unique(np.array(affected_genes))
-	print('\n', affected_genes)
+	#print('\n', affected_genes)
 	to_invert = []
 	for i in affected_genes :
 		to_invert.append(sens[i])
 	inverted = np.flip(np.array(to_invert))
-	print(inverted)
+	#print(inverted)
 	for i in range(len(inverted)) :
 		if inverted[i] == "+" :
 			inverted[i] = "-"
 		else :
 			inverted[i] = "+"
-	print(inverted)
+	#print(inverted)
 	for i in (affected_genes) :
 		new_sens[i] = inverted[i-affected_genes[0]]
 		
@@ -180,7 +189,10 @@ def randomPos(dom_pos, gene_pos) :
 					cond = True
 			if(pos > gene_pos[i-1][1] and pos < gene_pos[i][0]) : 
 				cond = True
-	print("position for inversion", pos)
+		for i in range(len(dom_pos)) : #Refuse mutations at the exact positions of barriers
+			for j in range(len(dom_pos[i])) :
+				if pos == dom_pos[i, j] :
+					cond = False
 	return pos
 	
 	
@@ -207,6 +219,7 @@ def fitness(result, expected) :
 	return(fitness)
 	
 
+<<<<<<< HEAD
 def majFitness(event, q) :
 	newfitness = fitness("result.dat","cible.dat")
 	f = open("fitness.dat", 'r') 
@@ -214,6 +227,24 @@ def majFitness(event, q) :
 	print(t)
 	f2 = open("fitness.dat", 'a') 
 	new = False
+=======
+
+def random_event(PARAMS, dom_pos, gene_pos, sens) :
+	#pdb.set_trace()
+	FILENAME = "all_events_{}.txt".format(PARAMS) #Différent nom de fichier pour chaque set de paramètres
+	f = open(FILENAME, 'a')
+	choice = random.random()
+	if choice <= 1/3 :
+		insertion(dom_pos, gene_pos)
+		f.write("0,")
+	elif choice >1/3 and choice <= 2/3 :
+		deletion(dom_pos, gene_pos)
+		f.write("1,")
+	else :
+		inversion(dom_pos, gene_pos, sens)
+		f.write("2,")
+	f.close()
+>>>>>>> caa46df59522dea5bea1ae394e302625c1ed60bc
 	
 	if(newfitness > float(t[len(t)-1][1])) : 
 		f2.write('\n' + event + ':' + str(newfitness)) 
@@ -232,7 +263,11 @@ def majFitness(event, q) :
 #TESTS METHODES#
 ################
 
+<<<<<<< HEAD
 def main(argv) : 
+=======
+#def main(argv) 
+>>>>>>> caa46df59522dea5bea1ae394e302625c1ed60bc
 #bimbimbibm 
 	
 	if(argv == 1) : 
@@ -241,15 +276,30 @@ def main(argv) :
 
 if __name__ == "__main__" : 
 #boumboumboum 
-	main(sys.argv[1]) 
+	#main(sys.argv[1]) 
+	
+	PARAMS = "abc"
+	FILENAME = "all_events_{}.txt".format(PARAMS)
 
-writeData_init('tousgenesidentiques/TSS.dat', 'tousgenesidentiques/TTS.dat')
-gene_pos, dom_pos, sens = loadData('tousgenesidentiques/TSS.dat', 'tousgenesidentiques/TTS.dat')
+	writeData_init('tousgenesidentiques/TSS.dat', 'tousgenesidentiques/TTS.dat')
+	dom_pos, gene_pos, sens = loadData('tousgenesidentiques/TSS.dat', 'tousgenesidentiques/TTS.dat')
 
-print(gene_pos, '\n\n', dom_pos, '\n\n', sens)
 
-gene_pos, dom_pos, sens = inversion(gene_pos, dom_pos, sens)
+	events = open(FILENAME, 'w')
+	events.close()
+	for i in range(1000) :
+		print(i)
+		random_event(PARAMS, dom_pos, gene_pos, sens)
+	events = open(FILENAME, 'r')
+	for line in events :
+		all_events = line.split(',')
+		all_events.pop()
+		events_tab = [int(i) for i in all_events]
+	x = np.arange(len(events_tab))
+	plt.plot(x, events_tab)
+	plt.show()
 
-print(gene_pos, '\n\n', dom_pos, '\n\n', sens)
+	print(gene_pos, '\n\n', dom_pos, '\n\n', sens)
+	
 
 
