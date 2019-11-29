@@ -80,7 +80,7 @@ def writeData_return():
 
 #Ajoute un codon à une position définie dans le génome
 #Décale toutes les positions suivantes
-def insertion(dom_pos, gene_pos) :
+def insertion(dom_pos, gene_pos, sens, num_gene) :
 	pos = randomPos(dom_pos, gene_pos)
 	for i in range(len(gene_pos)) :
 		for j in range(len(gene_pos[i])) :
@@ -90,12 +90,13 @@ def insertion(dom_pos, gene_pos) :
 		for j in range(len(dom_pos[i])) :
 			if dom_pos[i,j] >= pos :
 				dom_pos[i,j] += 1
+	return (dom_pos, gene_pos, sens, num_gene)
 				
 				
 
 #Méthode deletion, delete une position aléatoire pos
 #Décale toutes les positions suivantes
-def deletion(dom_pos, gene_pos) : 
+def deletion(dom_pos, gene_pos, sens, num_gene) :
 	pos = randomPos(dom_pos, gene_pos)
 	for i in range(len(gene_pos)) :
 		for j in range(len(gene_pos[i])) :
@@ -105,12 +106,11 @@ def deletion(dom_pos, gene_pos) :
 		for j in range(len(dom_pos[i])) :
 			if dom_pos[i][j] >= pos :
 				dom_pos[i][j] -= 1
-
-			
+	return (dom_pos, gene_pos, sens, num_gene)	
 			
 			
  #pos1 < pos2
-def inversion(dom_pos, gene_pos, sens) :
+def inversion(dom_pos, gene_pos, sens, num_gene) :
 	pos1 = randomPos(dom_pos, gene_pos)
 	pos2 = randomPos(dom_pos, gene_pos)
 	pos11 = min(pos1, pos2)
@@ -120,14 +120,18 @@ def inversion(dom_pos, gene_pos, sens) :
 	new_pos_gene = []
 	new_pos_dom = []
 	new_sens = sens
-	#Verify that the genes are not cut in half
+	###########################################
+	#Verify that the genes are not cut in half#
+	###########################################
 	for i in range(len(gene_pos)):
 		"""print('i : ', i)
 		#print('gene position : ', gene_pos[i,0],gene_pos[i,1])
 		#print('positions of mutations : ', pos1, pos2, '\n')"""
 		if pos1 >= gene_pos[i,0] and pos1 <= gene_pos[i,1] or pos2 >= gene_pos[i,0] and pos2 <= gene_pos[i,1]:
 			sys.exit('impossible to cut the gene')
-	#Change positions of domains
+	#############################
+	#Change positions of domains#
+	#############################
 	for i in range(len(dom_pos)) :
 		for j in range (len(dom_pos[i])) :
 			if dom_pos[i][j] > pos1 and dom_pos[i][j] < pos2 :
@@ -136,7 +140,9 @@ def inversion(dom_pos, gene_pos, sens) :
 			else :
 				new_pos_dom.append(dom_pos[i][j])
 				"""print('same dom_pos : ' + str(dom_pos[i][j])  + '\n')"""
-	#Change positions of genes
+	###########################
+	#Change positions of genes#
+	###########################
 	affected_genes = []
 	for i in range(len(gene_pos)) :
 		for j in range (len(gene_pos[i])) :
@@ -147,8 +153,22 @@ def inversion(dom_pos, gene_pos, sens) :
 			else :
 				new_pos_gene.append(gene_pos[i][j])
 				"""print('same gene_pos : ' + str(gene_pos[i][j])  + '\n')"""
-	#Change orientation of genes
+	#print("new_pos : ", np.sort(np.array(new_pos_gene)).reshape(len(gene_pos), 2))
+	#######################
+	#Change order of genes#
+	#######################
 	affected_genes = np.unique(np.array(affected_genes))
+	new_num_gene = num_gene #Initialisation du nouveau tableau d'index de genes
+	inverted_real_affected_genes = np.flip(np.array([num_gene[i] for i in affected_genes])) 
+	#affected_genes est la position des gènes affectés dans l'ordre où ils sont présentés
+	#real_affected_genes est l'index des gènes affectés
+	#num_gene est le tableau de tous les index des genes
+	for i in affected_genes :
+		new_num_gene[i] = inverted_real_affected_genes[i - affected_genes[0]]
+		print(affected_genes, inverted_real_affected_genes, new_num_gene)
+	#############################
+	#Change orientation of genes#
+	#############################
 	#print('\n', affected_genes)
 	to_invert = []
 	for i in affected_genes :
@@ -167,8 +187,8 @@ def inversion(dom_pos, gene_pos, sens) :
 	new_pos_dom = np.sort(np.array(new_pos_dom)).reshape(len(dom_pos), 2)
 	new_pos_gene = np.sort(np.array(new_pos_gene)).reshape(len(gene_pos), 2)
 	
-	return (new_pos_gene, new_pos_dom, new_sens)
-
+	return (new_pos_dom, new_pos_gene, new_sens, new_num_gene)
+	
 ##############################################
 #CHOIX D'UNE POSITION ALEATOIRE POUR MUTATION#
 ##############################################
@@ -176,41 +196,28 @@ def inversion(dom_pos, gene_pos, sens) :
 #Les positions ne se trouvent pas dans les régions codantes
 def randomPos(dom_pos, gene_pos) : 
 	deb = dom_pos[0,0]
-	fin = dom_pos[-1,0]
+	fin = dom_pos[-1,1]
 	count = 0
 	cond = False
 	while(not cond) : 
 		pos = random.randint(deb,fin)
 		for i in range(len(gene_pos)):
 			if i == 0 :
-				if(pos < gene_pos[i,0]) :
+				if(pos < gene_pos[i,0] - 60) : #Distance de sécurité à gauche du premier gène
 					cond = True
-			if(pos > gene_pos[i-1][1] and pos < gene_pos[i][0]) : 
+			if(pos > gene_pos[i-1][1] + 60 and pos < gene_pos[i][0] - 60) : #Distance de sécurité entre deux gènes
 				cond = True
+			if i == len(gene_pos)-1 :
+				if pos > gene_pos[i,1] + 60 :
+					cond = True
 		for i in range(len(dom_pos)) : #Refuse mutations at the exact positions of barriers
 			for j in range(len(dom_pos[i])) :
 				if pos == dom_pos[i, j] :
 					cond = False
 	return pos
 	
-def random_event(PARAMS, dom_pos, gene_pos, sens, q, fileFitness) :
-	#pdb.set_trace()
-	FILENAME = "all_events_{}.txt".format(PARAMS) #Différent nom de fichier pour chaque set de paramètres
-	f = open(FILENAME, 'a')
-	choice = random.random()
-	if choice <= 1/3 :
-		insertion(dom_pos, gene_pos)
-		event = "Insertion"
-	elif choice >1/3 and choice <= 2/3 :
-		deletion(dom_pos, gene_pos)
-		event = "Deletion"
-	else :
-		inversion(dom_pos, gene_pos, sens)
-		event = "Inversion"
-	f.write(event)
-	f.close()
-	start_transcribing('params.ini')
-	majFitness(fileFitness, event ,q)
+
+	
 	
 #########
 #FITNESS#
@@ -233,7 +240,7 @@ def fitness(result, expected) :
 	for i in range(10) : 
 		fitness += math.log(obs[i]/cible[i])
 	return(fitness)
-	
+
 def majFitness(fileFitness ,PARAMS, event, q) :
 	newfitness = fitness('output/all_tr_info.csv',"cible.dat")
 	f = open(fileFitness, 'r') 
@@ -253,7 +260,29 @@ def majFitness(fileFitness ,PARAMS, event, q) :
 	return new
 
 		
-		
+##############
+#RANDOM EVENT#
+##############
+def random_event(PARAMS, dom_pos, gene_pos, sens, num_gene, q, fileFitness) :
+	#pdb.set_trace()
+	FILENAME = "all_events_{}.txt".format(PARAMS) #Différent nom de fichier pour chaque set de paramètres
+	f = open(FILENAME, 'a')
+	choice = random.random()
+	if choice <= 1/3 :
+		new_dom_pos, new_gene_pos, new_sens, new_num_gene = insertion(dom_pos, gene_pos, sens, num_gene)
+		event = "0,"
+	elif choice >1/3 and choice <= 2/3 :
+		new_dom_pos, new_gene_pos, new_sens, new_num_gene = deletion(dom_pos, gene_pos, sens, num_gene)
+		event = "1,"
+	else :
+		new_dom_pos, new_gene_pos, new_sens, new_num_gene = inversion(dom_pos, gene_pos, sens, num_gene)
+		event = "2,"
+	f.write(event)
+	f.close()
+	start_transcribing('params.ini')
+	majFitness(fileFitness, event ,q)
+	return(new_dom_pos, new_gene_pos, new_sens, new_num_gene)
+
 ################
 #TESTS METHODES#
 ################
@@ -269,9 +298,10 @@ def main() :
 
 	events = open(FILENAME, 'w')
 	events.close()
-	for i in range(1000) :
-		print(i)
-		random_event(PARAMS, dom_pos, gene_pos, sens)
+	for i in range(100) :
+		if i in [k*100 for k in range (int(1000/100))] :
+			print(i)
+		dom_pos, gene_pos, sens, num_gene = random_event(PARAMS, dom_pos, gene_pos, sens, num_gene)
 	events = open(FILENAME, 'r')
 	for line in events :
 		all_events = line.split(',')
@@ -281,9 +311,8 @@ def main() :
 	plt.plot(x, events_tab)
 	plt.show()
 
-	print(gene_pos, '\n\n', dom_pos, '\n\n', sens)
 
-
+	print(gene_pos, '\n\n', dom_pos, '\n\n', sens, num_gene)
 
 		
 
