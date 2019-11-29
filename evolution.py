@@ -15,7 +15,8 @@ print('Ceci est notre code')
 
 #Ecrit les données TSS et TTS dans l'ordre : 
 #debut de domaine, debut de gene, fin de gene, fin de domaine
-def loadData(TSS, TTS) : 
+def loadData(TSS, TTS) :
+	num_gene = []
 	gene_pos = []
 	dom_pos = []
 	sens = []
@@ -24,10 +25,12 @@ def loadData(TSS, TTS) :
 	tss = [[e for e in l[:-1].split('\t')] for l in f1.readlines()[1:]]
 	tts = [[e for e in l[:-1].split('\t')] for l in f2.readlines()[1:]]
 	for i in range(10) :
+		num_gene.append(i)
 		dom_pos.append([(3000*i)+1, 3000*(i+1)])
 		gene_pos.append([int(tss[i][2]),int(tts[i][2])])
 		sens.append(tss[i][1])
-	return (np.array(dom_pos), np.array(gene_pos), np.array(sens))
+	return (np.array(num_gene), np.array(dom_pos), np.array(gene_pos), np.array(sens))
+
 
 def writeData_init(TSS, TTS) :
 	f1 = open('tousgenesidentiques/TSSevol_prev.dat', 'w')
@@ -58,15 +61,9 @@ def writeData(gene_pos, sens, inversion=False) :
 		f1.close()
 		f2.close()
 		
-def writeData_inversion():
+def writeData_return():
 	shutil.copy('tousgenesidentiques/TSSevol_prev.dat', 'tousgenesidentiques/TSSevol.dat')
 	shutil.copy('tousgenesidentiques/TTSevol_prev.dat', 'tousgenesidentiques/TTSevol.dat')
-	
-
-#writeData_init('tousgenesidentiques/TSS.dat', 'tousgenesidentiques/TTS.dat')	
-#dom_pos, gene_pos, sens = loadData('tousgenesidentiques/TSSevol.dat', 'tousgenesidentiques/TTSevol.dat')
-#writeData(gene_pos, sens)
-#writeData_inversion()
 
 
 #########################
@@ -245,13 +242,13 @@ def random_event(PARAMS, dom_pos, gene_pos, sens) :
 
 if __name__ == "__main__" : 
 #boumboumboum 
-	#main(sys.argv[1]) 
-	
+	#main(sys.argv[1])
+
 	PARAMS = "abc"
 	FILENAME = "all_events_{}.txt".format(PARAMS)
 
 	writeData_init('tousgenesidentiques/TSS.dat', 'tousgenesidentiques/TTS.dat')
-	dom_pos, gene_pos, sens = loadData('tousgenesidentiques/TSS.dat', 'tousgenesidentiques/TTS.dat')
+	num_gene, dom_pos, gene_pos, sens = loadData('tousgenesidentiques/TSS.dat', 'tousgenesidentiques/TTS.dat')
 
 
 	events = open(FILENAME, 'w')
@@ -269,6 +266,6 @@ if __name__ == "__main__" :
 	plt.show()
 
 	print(gene_pos, '\n\n', dom_pos, '\n\n', sens)
-	
+
 
 
