@@ -3,7 +3,9 @@ import numpy as np
 import random
 import shutil
 import sys
-import pdb
+import os
+import math
+import pdb #Debugueur
 import matplotlib.pyplot as plt
 from TwisTranscripT.TSC import *
 
@@ -27,7 +29,7 @@ def loadData(TSS, TTS) :
 	tts = [[e for e in l[:-1].split('\t')] for l in f2.readlines()[1:]]
 	for i in range(10) :
 		num_gene.append(i)
-		dom_pos.append([(3000*i)+1, 3000*(i+1)])
+		dom_pos.append([(3000*i)+1, 3000*(i+1)])#A changer quand on aura des genes de taille différente
 		gene_pos.append([int(tss[i][2]),int(tts[i][2])])
 		sens.append(tss[i][1])
 	return (np.array(num_gene), np.array(dom_pos), np.array(gene_pos), np.array(sens))
@@ -44,6 +46,7 @@ def writeData_init(TSS, TTS) :
 	f4.close()
 	shutil.copy(TSS,'tousgenesidentiques/TSSevol.dat')
 	shutil.copy(TTS,'tousgenesidentiques/TTSevol.dat')
+	#Ouvrir GFF aussi
 	
 def writeData(gene_pos, sens, inversion=False) :
 		shutil.copy('tousgenesidentiques/TSSevol.dat', 'tousgenesidentiques/TSSevol_prev.dat')
@@ -57,26 +60,26 @@ def writeData(gene_pos, sens, inversion=False) :
 			f2.write(str(i)+'\t')
 			f1.write(sens[i]+'\t')
 			f2.write(sens[i]+'\t')
-			f1.write(str(gene_pos[i,0]+4)+'\t.2\n')
-			f2.write(str(gene_pos[i,1]+4)+'\t1.\n')
+			f1.write(str(gene_pos[i,0]+4)+'\t.2\n')#A changer pour genes différents
+			f2.write(str(gene_pos[i,1]+4)+'\t1.\n')#Idem
 		f1.close()
 		f2.close()
 		
-def writeData_return():
+def writeData_return(FILE_EVENTS):
 	shutil.copy('tousgenesidentiques/TSSevol_prev.dat', 'tousgenesidentiques/TSSevol.dat')
 	shutil.copy('tousgenesidentiques/TTSevol_prev.dat', 'tousgenesidentiques/TTSevol.dat')
+	with open(FILE_EVENTS, 'rb+') as filehandle:
+		filehandle.seek(-1, os.SEEK_END)
+		filehandle.truncate()
+		filehandle.seek(-1, os.SEEK_END)
+		filehandle.truncate()
+	#Mettre à jour GFF
 
 
 #########################
 #EVENEMENTS DE MUTATIONS#
 #########################
 
-
-#
-
-#Inclure une distance de sécurité de 60 nt autour des régions codantes
-
-#
 
 #Ajoute un codon à une position définie dans le génome
 #Décale toutes les positions suivantes
@@ -109,7 +112,6 @@ def deletion(dom_pos, gene_pos, sens, num_gene) :
 	return (dom_pos, gene_pos, sens, num_gene)	
 			
 			
- #pos1 < pos2
 def inversion(dom_pos, gene_pos, sens, num_gene) :
 	pos1 = randomPos(dom_pos, gene_pos)
 	pos2 = randomPos(dom_pos, gene_pos)
@@ -121,7 +123,7 @@ def inversion(dom_pos, gene_pos, sens, num_gene) :
 	new_pos_dom = []
 	new_sens = sens
 	###########################################
-	#Verify that the genes are not cut in half#
+	#Verify that the genes are not cut in half# #Condition normalement vérifiée dans random_event
 	###########################################
 	for i in range(len(gene_pos)):
 		"""print('i : ', i)
@@ -153,7 +155,6 @@ def inversion(dom_pos, gene_pos, sens, num_gene) :
 			else :
 				new_pos_gene.append(gene_pos[i][j])
 				"""print('same gene_pos : ' + str(gene_pos[i][j])  + '\n')"""
-	#print("new_pos : ", np.sort(np.array(new_pos_gene)).reshape(len(gene_pos), 2))
 	#######################
 	#Change order of genes#
 	#######################
@@ -161,32 +162,27 @@ def inversion(dom_pos, gene_pos, sens, num_gene) :
 	new_num_gene = num_gene #Initialisation du nouveau tableau d'index de genes
 	inverted_real_affected_genes = np.flip(np.array([num_gene[i] for i in affected_genes])) 
 	#affected_genes est la position des gènes affectés dans l'ordre où ils sont présentés
-	#real_affected_genes est l'index des gènes affectés
+	#inverted_real_affected_genes est l'index des gènes affectés dans leur nouvel ordre
 	#num_gene est le tableau de tous les index des genes
 	for i in affected_genes :
 		new_num_gene[i] = inverted_real_affected_genes[i - affected_genes[0]]
-		print(affected_genes, inverted_real_affected_genes, new_num_gene)
+		'''print(affected_genes, inverted_real_affected_genes, new_num_gene)'''
 	#############################
 	#Change orientation of genes#
 	#############################
-	#print('\n', affected_genes)
 	to_invert = []
 	for i in affected_genes :
 		to_invert.append(sens[i])
 	inverted = np.flip(np.array(to_invert))
-	#print(inverted)
 	for i in range(len(inverted)) :
 		if inverted[i] == "+" :
 			inverted[i] = "-"
 		else :
 			inverted[i] = "+"
-	#print(inverted)
 	for i in (affected_genes) :
 		new_sens[i] = inverted[i-affected_genes[0]]
-		
 	new_pos_dom = np.sort(np.array(new_pos_dom)).reshape(len(dom_pos), 2)
 	new_pos_gene = np.sort(np.array(new_pos_gene)).reshape(len(gene_pos), 2)
-	
 	return (new_pos_dom, new_pos_gene, new_sens, new_num_gene)
 	
 ##############################################
@@ -203,12 +199,12 @@ def randomPos(dom_pos, gene_pos) :
 		pos = random.randint(deb,fin)
 		for i in range(len(gene_pos)):
 			if i == 0 :
-				if(pos < gene_pos[i,0] - 60) : #Distance de sécurité à gauche du premier gène
+				if (pos < gene_pos[i,0] - 60) : #Distance de sécurité à gauche du premier gène
 					cond = True
 			if(pos > gene_pos[i-1][1] + 60 and pos < gene_pos[i][0] - 60) : #Distance de sécurité entre deux gènes
 				cond = True
 			if i == len(gene_pos)-1 :
-				if pos > gene_pos[i,1] + 60 :
+				if (pos > gene_pos[i,1] + 60) : #Distance de sécurité à droite du dernier gène
 					cond = True
 		for i in range(len(dom_pos)) : #Refuse mutations at the exact positions of barriers
 			for j in range(len(dom_pos[i])) :
@@ -229,44 +225,61 @@ def fitness(result, expected) :
 	cible = [] 
 	f1 = open(result)
 	f2 = open(expected)
-	t = [[e for e in l[:-1].split('\t')] for l in f1.readlines()[0:]]
-	print(t)
-	tt = [[e for e in l[:-1].split()] for l in f2.readlines()[0:]] 
-	print(t[9][5])
+	res = [[e for e in l[:-1].split('\t')] for l in f1.readlines()[0:]]
+	'''print("\n\n\nEXPRESSION PROFILE \n")
+	print(res)'''
+	sum_transcripts = sum([int(line[7]) for line in res[1:]])
+	#print(sum_transcripts)
+	exp = [[e for e in l[:-1].split()] for l in f2.readlines()[0:]]
+	'''print("\nEXPECTED PROFILE \n")
+	print(exp)'''
 	for i in range(10) :
-		cible.append(int(tt[i][4]))
-		obs.append(int(t[i+1][7]))
+		cible.append(float(exp[i][1])*sum_transcripts)
+		#cible.append(int(exp[i][4]))
+		obs.append(int(res[i+1][7]))
 	fitness = 0 
 	for i in range(10) : 
-		fitness += math.log(obs[i]/cible[i])
+		fitness += abs(math.log(obs[i]/cible[i]))
+	fitness = math.exp(-fitness)
 	return(fitness)
 
-def majFitness(fileFitness ,PARAMS, event, q) :
-	newfitness = fitness('output/all_tr_info.csv',"cible.dat")
-	f = open(fileFitness, 'r') 
-	t = [[e for e in l[:-1].split(':')] for l in f.readlines()[0:]] 
-	f2 = open(fileFitness, 'a') 
+#Write fitness in empty file
+def first_fitness(FILE_FITNESS, event):
+	f = open(FILE_FITNESS, 'a')
+	newfitness = fitness('output/all_tr_info.csv',"environment.dat")
+	f.write(event.split(',')[0] + ':' + str(newfitness))
+	f.close()
+
+#Compare and write fitness in not empty file
+def majFitness(FILE_EVENTS, FILE_FITNESS, event, q) :
+	#newfitness = fitness('output/all_tr_info.csv',"cible.dat")
+	newfitness = fitness('output/all_tr_info.csv',"environment.dat")
+	f = open(FILE_FITNESS, 'r') 
+	t = [[e for e in l[:-1].split(':')] for l in f.readlines()[0:]] #event : fitness
+	f2 = open(FILE_FITNESS, 'a')
 	
 	if(newfitness > float(t[len(t)-1][1])) : 
-		f2.write('\n' + event + ':' + str(newfitness)) 
-
+		f2.write('\n' + event.split(',')[0] + ':' + str(newfitness)) #Write superior fitness
 	else : 
-		perte = float(t[len(t)-1][1]) - newfitness 
-		if(math.exp(-perte/q) < 0.5)  : 
-			f2.write('\n' + event + ':' + str(newfitness))  
+		delta_fitness = float(t[len(t)-1][1]) - newfitness
+		dice = random.random()
+		print(delta_fitness)
+		print('Probability of accepting : ', math.exp(-delta_fitness/q))
+		if dice < math.exp(-delta_fitness/q) :
+		#if(math.exp(-delta_fitness/q) < 0.5)  : 
+			f2.write('\n' + event.split(',')[0] + ':' + str(newfitness))  #Write inferior fitness
 		else : 
-			writeData_return()
+			#Return to previous step
+			writeData_return(FILE_EVENTS)
+	return newfitness
 
-	return new
 
-		
 ##############
 #RANDOM EVENT#
 ##############
-def random_event(PARAMS, dom_pos, gene_pos, sens, num_gene, q, fileFitness) :
+def random_event(dom_pos, gene_pos, sens, num_gene, q, FILE_EVENTS, FILE_FITNESS) :
 	#pdb.set_trace()
-	FILENAME = "all_events_{}.txt".format(PARAMS) #Différent nom de fichier pour chaque set de paramètres
-	f = open(FILENAME, 'a')
+	f = open(FILE_EVENTS, 'a')
 	choice = random.random()
 	if choice <= 1/3 :
 		new_dom_pos, new_gene_pos, new_sens, new_num_gene = insertion(dom_pos, gene_pos, sens, num_gene)
@@ -279,8 +292,18 @@ def random_event(PARAMS, dom_pos, gene_pos, sens, num_gene, q, fileFitness) :
 		event = "2,"
 	f.write(event)
 	f.close()
-	start_transcribing('params.ini')
-	majFitness(fileFitness, event ,q)
+	f = open(FILE_EVENTS, 'r')
+	line = f.readline()
+	print("All events : ", line)
+	print("Number of events : ", len(line.split(','))-1)
+	if (len(line.split(',')) == 2 ): #Write in a new fitness file if this is the first event (len([event, '']) = 2)
+		first_fitness(FILE_FITNESS, event)
+	else :
+		start_transcribing('params.ini')
+		majFitness(FILE_EVENTS, FILE_FITNESS, event ,q)
+	f.close()
+	#Mettre à jour GFF
+	
 	return(new_dom_pos, new_gene_pos, new_sens, new_num_gene)
 
 ################
@@ -290,19 +313,24 @@ def random_event(PARAMS, dom_pos, gene_pos, sens, num_gene, q, fileFitness) :
 def main() : 
 #bimbimbibm 	
 	PARAMS = "abc"
-	FILENAME = "all_events_{}.txt".format(PARAMS)
+	FILE_EVENTS = "all_events_{}.txt".format(PARAMS)#Différent nom de fichier pour chaque set de paramètres
+	FILE_FITNESS = "all_fitness_{}.txt".format(PARAMS)#Différent nom de fichier pour chaque set de paramètres
 
 	writeData_init('tousgenesidentiques/TSS.dat', 'tousgenesidentiques/TTS.dat')
 	num_gene, dom_pos, gene_pos, sens = loadData('tousgenesidentiques/TSS.dat', 'tousgenesidentiques/TTS.dat')
 
-
-	events = open(FILENAME, 'w')
+	fitnesses = open(FILE_FITNESS, 'w')
+	fitnesses.close()
+	events = open(FILE_EVENTS, 'w')
 	events.close()
 	for i in range(100) :
-		if i in [k*100 for k in range (int(1000/100))] :
-			print(i)
-		dom_pos, gene_pos, sens, num_gene = random_event(PARAMS, dom_pos, gene_pos, sens, num_gene)
-	events = open(FILENAME, 'r')
+		print("\nIteration : ", i+1)
+		#if i in [k*100 for k in range (int(1000/100))] :
+			#print(i)
+		dom_pos, gene_pos, sens, num_gene = random_event(dom_pos, gene_pos, sens, num_gene, 0.00001, FILE_EVENTS, FILE_FITNESS)
+		
+	'''
+	events = open(FILE_EVENTS, 'r')
 	for line in events :
 		all_events = line.split(',')
 		all_events.pop()
@@ -310,9 +338,10 @@ def main() :
 	x = np.arange(len(events_tab))
 	plt.plot(x, events_tab)
 	plt.show()
+	'''
 
 
-	print(gene_pos, '\n\n', dom_pos, '\n\n', sens, num_gene)
+	#print(gene_pos, '\n\n', dom_pos, '\n\n', sens, num_gene)
 
 		
 
