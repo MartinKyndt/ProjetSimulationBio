@@ -5,6 +5,7 @@ import shutil
 import sys
 import os
 import math
+import time
 import pdb #Debugueur
 import matplotlib.pyplot as plt
 from TwisTranscripT.TSC import *
@@ -35,40 +36,55 @@ def loadData(TSS, TTS) :
 	return (np.array(num_gene), np.array(dom_pos), np.array(gene_pos), np.array(sens))
 
 
-def writeData_init(TSS, TTS) :
+def writeData_init(TSS, TTS, GFF) :
 	f1 = open('tousgenesidentiques/TSSevol_prev.dat', 'w')
 	f2 = open('tousgenesidentiques/TTSevol_prev.dat', 'w')
 	f3 = open('tousgenesidentiques/TSSevol.dat', 'w')
 	f4 = open('tousgenesidentiques/TTSevol.dat', 'w')
+	#f5 = open('tousgenesidentiques/tousgenesidentiques_evol_prev.gff', 'w')
+	#f6 = open('tousgenesidentiques/tousgenesidentiques_evol.gff', 'w')
 	f1.close()
 	f2.close()
 	f3.close()
 	f4.close()
+	#f5.close()
+	#f6.close()
 	shutil.copy(TSS,'tousgenesidentiques/TSSevol.dat')
 	shutil.copy(TTS,'tousgenesidentiques/TTSevol.dat')
+	#shutil.copy(GFF,'tousgenesidentiques/tousgenesidentiques_evol.dat')
 	#Ouvrir GFF aussi
 	
+	#GFF sert seulement à calculer la taille du génome dans TSC.py
+	
 def writeData(gene_pos, sens, inversion=False) :
-		shutil.copy('tousgenesidentiques/TSSevol.dat', 'tousgenesidentiques/TSSevol_prev.dat')
-		shutil.copy('tousgenesidentiques/TTSevol.dat', 'tousgenesidentiques/TTSevol_prev.dat')
-		f1 = open('tousgenesidentiques/TSSevol.dat', 'w')
-		f2 = open('tousgenesidentiques/TTSevol.dat', 'w')
-		f1.write('TUindex\tTUorient\tTTS_pos\tTTS_sstrength\n')
-		f2.write('TUindex\tTUorient\tTTS_pos\tTTS_proba_off\n')
-		for i in range(len(gene_pos)):
-			f1.write(str(i)+'\t')
-			f2.write(str(i)+'\t')
-			f1.write(sens[i]+'\t')
-			f2.write(sens[i]+'\t')
-			f1.write(str(gene_pos[i,0]+4)+'\t.2\n')#A changer pour genes différents
-			f2.write(str(gene_pos[i,1]+4)+'\t1.\n')#Idem
-		f1.close()
-		f2.close()
+	shutil.copy('tousgenesidentiques/TSSevol.dat', 'tousgenesidentiques/TSSevol_prev.dat')
+	shutil.copy('tousgenesidentiques/TTSevol.dat', 'tousgenesidentiques/TTSevol_prev.dat')
+	f1 = open('tousgenesidentiques/TSSevol.dat', 'w')
+	f2 = open('tousgenesidentiques/TTSevol.dat', 'w')
+	'''
+	Dans params.ini :
+	tssevol = tousgenesidentiques/TSSevol.dat
+	ttsevol = tousgenesidentiques/TTSevol.dat
+	Il faut changer le format  de TSSevol et TTSevol (pd.dataframe) pour que la ligne 557 de TSC.py puisse s'exécuter et lire le fichier correctement
+	'''
+	
+	
+	f1.write('TUindex\tTUorient\tTTS_pos\tTTS_sstrength\n')
+	f2.write('TUindex\tTUorient\tTTS_pos\tTTS_proba_off\n')
+	for i in range(len(gene_pos)):
+		f1.write(str(i)+'\t')
+		f2.write(str(i)+'\t')
+		f1.write(sens[i]+'\t')
+		f2.write(sens[i]+'\t')
+		f1.write(str(gene_pos[i,0])+'\t.2\n')#A changer pour genes différents
+		f2.write(str(gene_pos[i,1])+'\t1.\n')#Idem
+	f1.close()
+	f2.close()
 		
 def writeData_return(FILE_EVENTS):
 	shutil.copy('tousgenesidentiques/TSSevol_prev.dat', 'tousgenesidentiques/TSSevol.dat')
 	shutil.copy('tousgenesidentiques/TTSevol_prev.dat', 'tousgenesidentiques/TTSevol.dat')
-	with open(FILE_EVENTS, 'rb+') as filehandle:
+	with open(FILE_EVENTS, 'rb+') as filehandle:#remove last event (ex : '2,')
 		filehandle.seek(-1, os.SEEK_END)
 		filehandle.truncate()
 		filehandle.seek(-1, os.SEEK_END)
@@ -266,7 +282,7 @@ def majFitness(FILE_EVENTS, FILE_FITNESS, event, q) :
 		print(delta_fitness)
 		print('Probability of accepting : ', math.exp(-delta_fitness/q))
 		if dice < math.exp(-delta_fitness/q) :
-		#if(math.exp(-delta_fitness/q) < 0.5)  : 
+		#if(math.exp(-delta_fitness/q) < 0.5)  :
 			f2.write('\n' + event.split(',')[0] + ':' + str(newfitness))  #Write inferior fitness
 		else : 
 			#Return to previous step
@@ -303,6 +319,7 @@ def random_event(dom_pos, gene_pos, sens, num_gene, q, FILE_EVENTS, FILE_FITNESS
 		majFitness(FILE_EVENTS, FILE_FITNESS, event ,q)
 	f.close()
 	#Mettre à jour GFF
+	writeData(new_gene_pos, new_sens)
 	
 	return(new_dom_pos, new_gene_pos, new_sens, new_num_gene)
 
@@ -310,13 +327,17 @@ def random_event(dom_pos, gene_pos, sens, num_gene, q, FILE_EVENTS, FILE_FITNESS
 #TESTS METHODES#
 ################
 
-def main() : 
-#bimbimbibm 	
+def main() :
+
+	
+	#Initiation of clock
+	start_time = time.time()
+		
 	PARAMS = "abc"
 	FILE_EVENTS = "all_events_{}.txt".format(PARAMS)#Différent nom de fichier pour chaque set de paramètres
 	FILE_FITNESS = "all_fitness_{}.txt".format(PARAMS)#Différent nom de fichier pour chaque set de paramètres
 
-	writeData_init('tousgenesidentiques/TSS.dat', 'tousgenesidentiques/TTS.dat')
+	writeData_init('tousgenesidentiques/TSS.dat', 'tousgenesidentiques/TTS.dat', 'tousgenesidentiques/tousgenesidentiques.gff')
 	num_gene, dom_pos, gene_pos, sens = loadData('tousgenesidentiques/TSS.dat', 'tousgenesidentiques/TTS.dat')
 
 	fitnesses = open(FILE_FITNESS, 'w')
@@ -329,19 +350,19 @@ def main() :
 			#print(i)
 		dom_pos, gene_pos, sens, num_gene = random_event(dom_pos, gene_pos, sens, num_gene, 0.00001, FILE_EVENTS, FILE_FITNESS)
 		
-	'''
-	events = open(FILE_EVENTS, 'r')
-	for line in events :
-		all_events = line.split(',')
-		all_events.pop()
-		events_tab = [int(i) for i in all_events]
-	x = np.arange(len(events_tab))
-	plt.plot(x, events_tab)
-	plt.show()
-	'''
+		'''
+		events = open(FILE_EVENTS, 'r')
+		for line in events :
+			all_events = line.split(',')
+			all_events.pop()
+			events_tab = [int(i) for i in all_events]
+		x = np.arange(len(events_tab))
+		plt.plot(x, events_tab)
+		plt.show()
+		'''
 
 
-	#print(gene_pos, '\n\n', dom_pos, '\n\n', sens, num_gene)
+		'''print(gene_pos, '\n\n', dom_pos, '\n\n', sens, num_gene)'''
 
 		
 
