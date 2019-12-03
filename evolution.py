@@ -69,8 +69,8 @@ def writeData(gene_pos, sens, inversion=False) :
 	'''
 	
 	
-	f1.write('TUindex\tTUorient\tTTS_pos\tTTS_sstrength\n')
-	f2.write('TUindex\tTUorient\tTTS_pos\tTTS_proba_off\n')
+	f1.write("TUindex\tTUorient\tTSS_pos\tTSS_strength\n")
+	f2.write("TUindex\tTUorient\tTTS_pos\tTTS_proba_off\n")
 	for i in range(len(gene_pos)):
 		f1.write(str(i)+'\t')
 		f2.write(str(i)+'\t')
@@ -82,6 +82,7 @@ def writeData(gene_pos, sens, inversion=False) :
 	f2.close()
 		
 def writeData_return(FILE_EVENTS):
+	print('WRITE RETURN')
 	shutil.copy('tousgenesidentiques/TSSevol_prev.dat', 'tousgenesidentiques/TSSevol.dat')
 	shutil.copy('tousgenesidentiques/TTSevol_prev.dat', 'tousgenesidentiques/TTSevol.dat')
 	with open(FILE_EVENTS, 'rb+') as filehandle:#remove last event (ex : '2,')
@@ -89,6 +90,8 @@ def writeData_return(FILE_EVENTS):
 		filehandle.truncate()
 		filehandle.seek(-1, os.SEEK_END)
 		filehandle.truncate()
+	num_gene, dom_pos, gene_pos, sens = loadData('tousgenesidentiques/TSSevol.dat', 'tousgenesidentiques/TTSevol.dat')
+	return  dom_pos, gene_pos, sens, num_gene
 	#Mettre à jour GFF
 
 
@@ -109,6 +112,7 @@ def insertion(dom_pos, gene_pos, sens, num_gene) :
 		for j in range(len(dom_pos[i])) :
 			if dom_pos[i,j] >= pos :
 				dom_pos[i,j] += 1
+	print('\nINSERTION : {}\n'.format(pos))
 	return (dom_pos, gene_pos, sens, num_gene)
 				
 				
@@ -125,6 +129,7 @@ def deletion(dom_pos, gene_pos, sens, num_gene) :
 		for j in range(len(dom_pos[i])) :
 			if dom_pos[i][j] >= pos :
 				dom_pos[i][j] -= 1
+	print('\nDELETION : {}\n'.format(pos))
 	return (dom_pos, gene_pos, sens, num_gene)	
 			
 			
@@ -199,6 +204,7 @@ def inversion(dom_pos, gene_pos, sens, num_gene) :
 		new_sens[i] = inverted[i-affected_genes[0]]
 	new_pos_dom = np.sort(np.array(new_pos_dom)).reshape(len(dom_pos), 2)
 	new_pos_gene = np.sort(np.array(new_pos_gene)).reshape(len(gene_pos), 2)
+	print('\nINVERSION : {}-{}\n'.format(pos1,pos2))
 	return (new_pos_dom, new_pos_gene, new_sens, new_num_gene)
 	
 ##############################################
@@ -267,16 +273,18 @@ def first_fitness(FILE_FITNESS, event):
 	f.close()
 
 #Compare and write fitness in not empty file
-def majFitness(FILE_EVENTS, FILE_FITNESS, event, q) :
+def majFitness(num_gene, dom_pos, gene_pos, sens, FILE_EVENTS, FILE_FITNESS, event, q) :
 	#newfitness = fitness('output/all_tr_info.csv',"cible.dat")
 	newfitness = fitness('output/all_tr_info.csv',"environment.dat")
 	f = open(FILE_FITNESS, 'r') 
 	t = [[e for e in l[:-1].split(':')] for l in f.readlines()[0:]] #event : fitness
 	f2 = open(FILE_FITNESS, 'a')
-	
-	if(newfitness > float(t[len(t)-1][1])) : 
+	f = open(FILE_EVENTS, 'r')
+	line = f.readline()
+	f.close()
+	if(newfitness > float(t[len(t)-1][1])) :
 		f2.write('\n' + event.split(',')[0] + ':' + str(newfitness)) #Write superior fitness
-	else : 
+	else :
 		delta_fitness = float(t[len(t)-1][1]) - newfitness
 		dice = random.random()
 		print(delta_fitness)
@@ -284,10 +292,13 @@ def majFitness(FILE_EVENTS, FILE_FITNESS, event, q) :
 		if dice < math.exp(-delta_fitness/q) :
 		#if(math.exp(-delta_fitness/q) < 0.5)  :
 			f2.write('\n' + event.split(',')[0] + ':' + str(newfitness))  #Write inferior fitness
+		
 		else : 
 			#Return to previous step
-			writeData_return(FILE_EVENTS)
-	return newfitness
+			dom_pos, gene_pos, sens, num_gene = writeData_return(FILE_EVENTS)
+	f2.close()
+	#return newfitness, num_gene, dom_pos, gene_pos, sens
+	return dom_pos, gene_pos, sens, num_gene,
 
 
 ##############
@@ -295,7 +306,7 @@ def majFitness(FILE_EVENTS, FILE_FITNESS, event, q) :
 ##############
 def random_event(dom_pos, gene_pos, sens, num_gene, q, FILE_EVENTS, FILE_FITNESS) :
 	#pdb.set_trace()
-	f = open(FILE_EVENTS, 'a')
+	
 	choice = random.random()
 	if choice <= 1/3 :
 		new_dom_pos, new_gene_pos, new_sens, new_num_gene = insertion(dom_pos, gene_pos, sens, num_gene)
@@ -306,20 +317,24 @@ def random_event(dom_pos, gene_pos, sens, num_gene, q, FILE_EVENTS, FILE_FITNESS
 	else :
 		new_dom_pos, new_gene_pos, new_sens, new_num_gene = inversion(dom_pos, gene_pos, sens, num_gene)
 		event = "2,"
+	f = open(FILE_EVENTS, 'a')
 	f.write(event)
 	f.close()
 	f = open(FILE_EVENTS, 'r')
 	line = f.readline()
 	print("All events : ", line)
 	print("Number of events : ", len(line.split(','))-1)
+	writeData(new_gene_pos, new_sens)	
 	if (len(line.split(',')) == 2 ): #Write in a new fitness file if this is the first event (len([event, '']) = 2)
+		start_transcribing('params.ini')
 		first_fitness(FILE_FITNESS, event)
+		#majFitness(FILE_EVENTS, FILE_FITNESS, event ,q)
 	else :
 		start_transcribing('params.ini')
-		majFitness(FILE_EVENTS, FILE_FITNESS, event ,q)
+		new_dom_pos, new_gene_pos, new_sens, new_num_gene = majFitness(num_gene, dom_pos, gene_pos, sens, FILE_EVENTS, FILE_FITNESS, event ,q)
 	f.close()
 	#Mettre à jour GFF
-	writeData(new_gene_pos, new_sens)
+	
 	
 	return(new_dom_pos, new_gene_pos, new_sens, new_num_gene)
 
@@ -338,7 +353,7 @@ def main() :
 	FILE_FITNESS = "all_fitness_{}.txt".format(PARAMS)#Différent nom de fichier pour chaque set de paramètres
 
 	writeData_init('tousgenesidentiques/TSS.dat', 'tousgenesidentiques/TTS.dat', 'tousgenesidentiques/tousgenesidentiques.gff')
-	num_gene, dom_pos, gene_pos, sens = loadData('tousgenesidentiques/TSS.dat', 'tousgenesidentiques/TTS.dat')
+	num_gene, dom_pos, gene_pos, sens = loadData('tousgenesidentiques/TSSevol.dat', 'tousgenesidentiques/TTSevol.dat')
 
 	fitnesses = open(FILE_FITNESS, 'w')
 	fitnesses.close()
