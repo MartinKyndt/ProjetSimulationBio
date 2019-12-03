@@ -5,7 +5,7 @@ import shutil
 import sys
 import os
 import math
-import time
+import time as t
 import pdb #Debugueur
 import matplotlib.pyplot as plt
 from TwisTranscripT.TSC import *
@@ -56,7 +56,7 @@ def writeData_init(TSS, TTS, GFF) :
 	
 	#GFF sert seulement à calculer la taille du génome dans TSC.py
 	
-def writeData(gene_pos, sens, inversion=False) :
+def writeData(gene_pos, sens, num_gene, inversion=False) :
 	shutil.copy('tousgenesidentiques/TSSevol.dat', 'tousgenesidentiques/TSSevol_prev.dat')
 	shutil.copy('tousgenesidentiques/TTSevol.dat', 'tousgenesidentiques/TTSevol_prev.dat')
 	f1 = open('tousgenesidentiques/TSSevol.dat', 'w')
@@ -72,14 +72,15 @@ def writeData(gene_pos, sens, inversion=False) :
 	f1.write("TUindex\tTUorient\tTSS_pos\tTSS_strength\n")
 	f2.write("TUindex\tTUorient\tTTS_pos\tTTS_proba_off\n")
 	for i in range(len(gene_pos)):
-		f1.write(str(i)+'\t')
-		f2.write(str(i)+'\t')
+		f1.write(str(num_gene[i])+'\t')
+		f2.write(str(num_gene[i])+'\t')
 		f1.write(sens[i]+'\t')
 		f2.write(sens[i]+'\t')
 		f1.write(str(gene_pos[i,0])+'\t.2\n')#A changer pour genes différents
 		f2.write(str(gene_pos[i,1])+'\t1.\n')#Idem
 	f1.close()
 	f2.close()
+	#INVERSER POSITIONS TSS ET TTS POUR GENES INVERSES
 		
 def writeData_return(FILE_EVENTS):
 	print('WRITE RETURN')
@@ -157,6 +158,9 @@ def inversion(dom_pos, gene_pos, sens, num_gene) :
 	#############################
 	for i in range(len(dom_pos)) :
 		for j in range (len(dom_pos[i])) :
+			#Pour chaque position de début ou fin de domaine
+			#Si elle se situe entre les 2 positions d'inversion
+			#On change sa nouvelle position
 			if dom_pos[i][j] > pos1 and dom_pos[i][j] < pos2 :
 				new_pos_dom.append(pos1 + pos2 - dom_pos[i][j])
 				"""print('previous dom_pos : ' + str(dom_pos[i][j]) + ' ; New dom_pos : ' + str(pos1 + pos2 - dom_pos[i][j]) + '\n')"""
@@ -169,11 +173,15 @@ def inversion(dom_pos, gene_pos, sens, num_gene) :
 	affected_genes = []
 	for i in range(len(gene_pos)) :
 		for j in range (len(gene_pos[i])) :
+			#Pour chaque position de début ou fin de gene
+			#Si elle se situe entre les 2 positions d'inversion
+			#On change sa nouvelle position
 			if gene_pos[i][j] > pos1 and gene_pos[i][j] < pos2 :
 				new_pos_gene.append(pos1 + pos2 - gene_pos[i][j])
 				affected_genes.append(i)
 				"""print('previous gene_pos : ' + str(gene_pos[i][j]) + ' ; New gene_pos : ' + str(pos1 + pos2 - gene_pos[i][j]) + '\n')"""
 			else :
+			#Sinon sa position reste la même
 				new_pos_gene.append(gene_pos[i][j])
 				"""print('same gene_pos : ' + str(gene_pos[i][j])  + '\n')"""
 	#######################
@@ -204,6 +212,14 @@ def inversion(dom_pos, gene_pos, sens, num_gene) :
 		new_sens[i] = inverted[i-affected_genes[0]]
 	new_pos_dom = np.sort(np.array(new_pos_dom)).reshape(len(dom_pos), 2)
 	new_pos_gene = np.sort(np.array(new_pos_gene)).reshape(len(gene_pos), 2)
+	#On inverse TSS et TTS pour les genes en sens '-'
+	for i in range(len(new_sens)) :
+		if new_sens[i] == '-' :
+			tss = new_pos_gene[i,1]#La position la plus élevée est le tss
+			tts = new_pos_gene[i,0]#La position la plus basse est le tts
+			new_pos_gene[i,0] = tss#On met dans la colonne tss la position élevée
+			new_pos_gene[i,1] = tts#On met dans la colonne tts la position basse
+			
 	print('\nINVERSION : {}-{}\n'.format(pos1,pos2))
 	return (new_pos_dom, new_pos_gene, new_sens, new_num_gene)
 	
@@ -287,8 +303,7 @@ def majFitness(num_gene, dom_pos, gene_pos, sens, FILE_EVENTS, FILE_FITNESS, eve
 	else :
 		delta_fitness = float(t[len(t)-1][1]) - newfitness
 		dice = random.random()
-		print(delta_fitness)
-		print('Probability of accepting : ', math.exp(-delta_fitness/q))
+		print('\n\nProbability of accepting : ', math.exp(-delta_fitness/q))
 		if dice < math.exp(-delta_fitness/q) :
 		#if(math.exp(-delta_fitness/q) < 0.5)  :
 			f2.write('\n' + event.split(',')[0] + ':' + str(newfitness))  #Write inferior fitness
@@ -323,8 +338,8 @@ def random_event(dom_pos, gene_pos, sens, num_gene, q, FILE_EVENTS, FILE_FITNESS
 	f = open(FILE_EVENTS, 'r')
 	line = f.readline()
 	print("All events : ", line)
-	print("Number of events : ", len(line.split(','))-1)
-	writeData(new_gene_pos, new_sens)	
+	print("Number of events : ", len(line.split(','))-1, '\n')
+	writeData(new_gene_pos, new_sens, new_num_gene)	
 	if (len(line.split(',')) == 2 ): #Write in a new fitness file if this is the first event (len([event, '']) = 2)
 		start_transcribing('params.ini')
 		first_fitness(FILE_FITNESS, event)
@@ -377,7 +392,16 @@ def main() :
 		'''
 
 
-		'''print(gene_pos, '\n\n', dom_pos, '\n\n', sens, num_gene)'''
+		#print(gene_pos, '\n\n', dom_pos, '\n\n', sens, num_gene)
+		
+	end_time = t.time()
+	t = start_time-end_time
+	s = t%60
+	r = t//60
+	m = r%60
+	r = r//60
+	h = r%24
+	print('{} hours, {} minutes, {} seconds'.format(h, m, s))
 
 		
 
