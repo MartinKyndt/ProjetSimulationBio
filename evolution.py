@@ -5,7 +5,7 @@ import shutil
 import sys
 import os
 import math
-import time as t
+import time
 import pdb #Debugueur
 import matplotlib.pyplot as plt
 from TwisTranscripT.TSC import *
@@ -378,7 +378,7 @@ def main() :
 		print("\nIteration : ", i+1)
 		#if i in [k*100 for k in range (int(1000/100))] :
 			#print(i)
-		dom_pos, gene_pos, sens, num_gene = random_event(dom_pos, gene_pos, sens, num_gene, 0.00001, FILE_EVENTS, FILE_FITNESS)
+		dom_pos, gene_pos, sens, num_gene = random_event(dom_pos, gene_pos, sens, num_gene, 0.000001, FILE_EVENTS, FILE_FITNESS)
 		
 		'''
 		events = open(FILE_EVENTS, 'r')
@@ -394,13 +394,14 @@ def main() :
 
 		#print(gene_pos, '\n\n', dom_pos, '\n\n', sens, num_gene)
 		
-	end_time = t.time()
-	t = start_time-end_time
+	end_time = time.time()
+	t = end_time - start_time
 	s = t%60
 	r = t//60
 	m = r%60
 	r = r//60
 	h = r%24
+	print (t)
 	print('{} hours, {} minutes, {} seconds'.format(h, m, s))
 
 		
