@@ -127,7 +127,7 @@ def insertion(dom_pos, gene_pos, sens, num_gene) :
 				
 				
 
-#Méthode deletion, delete une position aléatoire pos
+#Méthode , delete une position aléatoire pos
 #Décale toutes les positions suivantes
 def deletion(dom_pos, gene_pos, sens, num_gene) :
 	pos = randomPos(dom_pos, gene_pos)
