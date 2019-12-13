@@ -62,18 +62,20 @@ def writeData_init(TSS, TTS, GFF, PROT) :
 	f4 = open('tousgenesidentiques/TSSevol.dat', 'w')
 	f5 = open('tousgenesidentiques/TTSevol.dat', 'w')
 	f6 = open('tousgenesidentiques/protevol.dat', 'w')
-	#f5 = open('tousgenesidentiques/tousgenesidentiques_evol_prev.gff', 'w')
-	#f6 = open('tousgenesidentiques/tousgenesidentiques_evol.gff', 'w')
+	f7 = open('tousgenesidentiques/tousgenesidentiques_evol_prev.gff', 'w')
+	f8 = open('tousgenesidentiques/tousgenesidentiques_evol.gff', 'w')
 	f1.close()
 	f2.close()
 	f3.close()
 	f4.close()
 	f5.close()
 	f6.close()
+	f7.close()
+	f8.close()
 	shutil.copy(TSS,'tousgenesidentiques/TSSevol.dat')
 	shutil.copy(TTS,'tousgenesidentiques/TTSevol.dat')
 	shutil.copy(PROT,'tousgenesidentiques/protevol.dat')
-	#shutil.copy(GFF,'tousgenesidentiques/tousgenesidentiques_evol.dat')
+	shutil.copy(GFF,'tousgenesidentiques/tousgenesidentiques_evol.gff')
 	#Ouvrir GFF aussi
 	
 	#GFF sert seulement à calculer la taille du génome dans TSC.py
@@ -82,6 +84,7 @@ def writeData(gene_pos, sens, num_gene, dom_pos) :
 	shutil.copy('tousgenesidentiques/TSSevol.dat', 'tousgenesidentiques/TSSevol_prev.dat')
 	shutil.copy('tousgenesidentiques/TTSevol.dat', 'tousgenesidentiques/TTSevol_prev.dat')
 	shutil.copy('tousgenesidentiques/protevol.dat', 'tousgenesidentiques/protevol_prev.dat')
+	shutil.copy('tousgenesidentiques/tousgenesidentiques_evol.gff', 'tousgenesidentiques/tousgenesidentiques_evol_prev.gff')
 	f1 = open('tousgenesidentiques/TSSevol.dat', 'w')
 	f2 = open('tousgenesidentiques/TTSevol.dat', 'w')
 	f3 = open('tousgenesidentiques/protevol.dat', 'w')
@@ -110,7 +113,6 @@ def writeData(gene_pos, sens, num_gene, dom_pos) :
 	f4 = open('tousgenesidentiques/tousgenesidentiques_evol.gff', 'r')
 	contenu = [[e for e in l.split('\t')] for l in f4.readlines()]
 	f4.close()
-	
 	contenu[3] = ['##sequence-region tousgenesidentiques' + str(dom_pos[0][0])+ ' ' + str(dom_pos[-1][1]) + '\n']
 	contenu[4][3] = str(dom_pos[0,0])
 	contenu[4][4] = str(dom_pos[-1,1])
