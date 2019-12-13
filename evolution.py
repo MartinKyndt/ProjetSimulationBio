@@ -19,6 +19,24 @@ print('Ceci est notre code')
 
 #Ecrit les données TSS et TTS dans l'ordre : 
 #debut de domaine, debut de gene, fin de gene, fin de domaine
+def writeData_init(TSS, TTS, GFF) :
+	f1 = open('tousgenesidentiques/TSSevol_prev.dat', 'w')
+	f2 = open('tousgenesidentiques/TTSevol_prev.dat', 'w')
+	f3 = open('tousgenesidentiques/TSSevol.dat', 'w')
+	f4 = open('tousgenesidentiques/TTSevol.dat', 'w')
+	f5 = open('tousgenesidentiques/tousgenesidentiques_evol_prev.gff', 'w')
+	f6 = open('tousgenesidentiques/tousgenesidentiques_evol.gff', 'w')
+	f1.close()
+	f2.close()
+	f3.close()
+	f4.close()
+	f5.close()
+	f6.close()
+	shutil.copy(TSS,'tousgenesidentiques/TSSevol.dat')
+	shutil.copy(TTS,'tousgenesidentiques/TTSevol.dat')
+	shutil.copy(GFF,'tousgenesidentiques/tousgenesidentiques_evol.gff')
+
+
 def loadData(TSS, TTS) :
 	num_gene = []
 	gene_pos = []
@@ -35,57 +53,55 @@ def loadData(TSS, TTS) :
 		sens.append(tss[i][1])
 	return (np.array(num_gene), np.array(dom_pos), np.array(gene_pos), np.array(sens))
 
-
-def writeData_init(TSS, TTS, GFF) :
-	f1 = open('tousgenesidentiques/TSSevol_prev.dat', 'w')
-	f2 = open('tousgenesidentiques/TTSevol_prev.dat', 'w')
-	f3 = open('tousgenesidentiques/TSSevol.dat', 'w')
-	f4 = open('tousgenesidentiques/TTSevol.dat', 'w')
-	#f5 = open('tousgenesidentiques/tousgenesidentiques_evol_prev.gff', 'w')
-	#f6 = open('tousgenesidentiques/tousgenesidentiques_evol.gff', 'w')
-	f1.close()
-	f2.close()
-	f3.close()
-	f4.close()
-	#f5.close()
-	#f6.close()
-	shutil.copy(TSS,'tousgenesidentiques/TSSevol.dat')
-	shutil.copy(TTS,'tousgenesidentiques/TTSevol.dat')
-	#shutil.copy(GFF,'tousgenesidentiques/tousgenesidentiques_evol.dat')
-	#Ouvrir GFF aussi
 	
-	#GFF sert seulement à calculer la taille du génome dans TSC.py
-	
-def writeData(gene_pos, sens, num_gene, inversion=False) :
+def writeData(gene_pos, sens, num_gene, dom_pos) :
 	shutil.copy('tousgenesidentiques/TSSevol.dat', 'tousgenesidentiques/TSSevol_prev.dat')
 	shutil.copy('tousgenesidentiques/TTSevol.dat', 'tousgenesidentiques/TTSevol_prev.dat')
+	shutil.copy('tousgenesidentiques/tousgenesidentiques_evol.gff', 'tousgenesidentiques/tousgenesidentiques_evol_prev.gff')
 	f1 = open('tousgenesidentiques/TSSevol.dat', 'w')
 	f2 = open('tousgenesidentiques/TTSevol.dat', 'w')
+	f3 = open('tousgenesidentiques/tousgenesidentiques_evol.gff', 'r')
 	'''
 	Dans params.ini :
 	tssevol = tousgenesidentiques/TSSevol.dat
 	ttsevol = tousgenesidentiques/TTSevol.dat
 	Il faut changer le format  de TSSevol et TTSevol (pd.dataframe) pour que la ligne 557 de TSC.py puisse s'exécuter et lire le fichier correctement
 	'''
-	
-	
 	f1.write("TUindex\tTUorient\tTSS_pos\tTSS_strength\n")
 	f2.write("TUindex\tTUorient\tTTS_pos\tTTS_proba_off\n")
-	for i in range(len(gene_pos)):
+	n = len(gene_pos)
+	for i in range(n):
 		f1.write(str(num_gene[i])+'\t')
 		f2.write(str(num_gene[i])+'\t')
 		f1.write(sens[i]+'\t')
 		f2.write(sens[i]+'\t')
-		f1.write(str(gene_pos[i,0])+'\t.2\n')#A changer pour genes différents
-		f2.write(str(gene_pos[i,1])+'\t1.\n')#Idem
+		f1.write(str(gene_pos[i,0])+'\t.2\n')
+		f2.write(str(gene_pos[i,1])+'\t1.\n')
 	f1.close()
 	f2.close()
-	#INVERSER POSITIONS TSS ET TTS POUR GENES INVERSES
+	
+	contenu = [[e for e in l.split('\t')] for l in f3.readlines()]
+	f3.close()
+	
+	contenu[3] = ['##sequence-region tousgenesidentiques' + str(dom_pos[0][0])+ ' ' + str(dom_pos[-1][1]) + '\n']
+	contenu[4][3] = str(dom_pos[0,0])
+	contenu[4][4] = str(dom_pos[-1,1])
+	for i in range(n):
+		contenu[i+5][3] = str(gene_pos[i,0])
+		contenu[i+5][4] = str(gene_pos[i,1])
+		contenu[i+5][6] = sens[i]
+	
+	f4 = open('tousgenesidentiques/tousgenesidentiques_evol.gff', 'w')
+	sep='\t'
+	for i in range(len(contenu)):
+		f4.write(sep.join(contenu[i]))
+		
 		
 def writeData_return(FILE_EVENTS):
 	print('WRITE RETURN')
 	shutil.copy('tousgenesidentiques/TSSevol_prev.dat', 'tousgenesidentiques/TSSevol.dat')
 	shutil.copy('tousgenesidentiques/TTSevol_prev.dat', 'tousgenesidentiques/TTSevol.dat')
+	shutil.copy('tousgenesidentiques/tousgenesidentiques_evol_prev.gff', 'tousgenesidentiques/tousgenesidentiques_evol.gff')
 	with open(FILE_EVENTS, 'rb+') as filehandle:#remove last event (ex : '2,')
 		filehandle.seek(-1, os.SEEK_END)
 		filehandle.truncate()
@@ -93,7 +109,6 @@ def writeData_return(FILE_EVENTS):
 		filehandle.truncate()
 	num_gene, dom_pos, gene_pos, sens = loadData('tousgenesidentiques/TSSevol.dat', 'tousgenesidentiques/TTSevol.dat')
 	return  dom_pos, gene_pos, sens, num_gene
-	#Mettre à jour GFF
 
 
 #########################
@@ -112,6 +127,7 @@ def insertion(dom_pos, gene_pos, sens, num_gene) :
 	for i in range(len(dom_pos)) :
 		for j in range(len(dom_pos[i])) :
 			if dom_pos[i,j] >= pos :
+				print('kaka')
 				dom_pos[i,j] += 1
 	print('\nINSERTION : {}\n'.format(pos))
 	return (dom_pos, gene_pos, sens, num_gene)
@@ -128,8 +144,8 @@ def deletion(dom_pos, gene_pos, sens, num_gene) :
 				gene_pos[i][j] -= 1
 	for i in range(len(dom_pos)) :
 		for j in range(len(dom_pos[i])) :
-			if dom_pos[i][j] >= pos :
-				dom_pos[i][j] -= 1
+			if dom_pos[i,j] >= pos :
+				dom_pos[i,j] -= 1
 	print('\nDELETION : {}\n'.format(pos))
 	return (dom_pos, gene_pos, sens, num_gene)	
 			
@@ -339,7 +355,7 @@ def random_event(dom_pos, gene_pos, sens, num_gene, q, FILE_EVENTS, FILE_FITNESS
 	line = f.readline()
 	print("All events : ", line)
 	print("Number of events : ", len(line.split(','))-1, '\n')
-	writeData(new_gene_pos, new_sens, new_num_gene)	
+	writeData(new_gene_pos, new_sens, new_num_gene, new_dom_pos)	
 	if (len(line.split(',')) == 2 ): #Write in a new fitness file if this is the first event (len([event, '']) = 2)
 		start_transcribing('params.ini')
 		first_fitness(FILE_FITNESS, event)
@@ -348,9 +364,7 @@ def random_event(dom_pos, gene_pos, sens, num_gene, q, FILE_EVENTS, FILE_FITNESS
 		start_transcribing('params.ini')
 		new_dom_pos, new_gene_pos, new_sens, new_num_gene = majFitness(num_gene, dom_pos, gene_pos, sens, FILE_EVENTS, FILE_FITNESS, event ,q)
 	f.close()
-	#Mettre à jour GFF
-	
-	
+	print(dom_pos)
 	return(new_dom_pos, new_gene_pos, new_sens, new_num_gene)
 
 ################
@@ -358,8 +372,6 @@ def random_event(dom_pos, gene_pos, sens, num_gene, q, FILE_EVENTS, FILE_FITNESS
 ################
 
 def main() :
-
-	
 	#Initiation of clock
 	start_time = time.time()
 		
@@ -391,7 +403,6 @@ def main() :
 		plt.show()
 		'''
 
-
 		#print(gene_pos, '\n\n', dom_pos, '\n\n', sens, num_gene)
 		
 	end_time = time.time()
@@ -404,10 +415,8 @@ def main() :
 	print (t)
 	print('{} hours, {} minutes, {} seconds'.format(h, m, s))
 
-		
 
-if __name__ == "__main__" : 
-#boumboumboum 
+if __name__ == "__main__" :
 	main()
 	
 
