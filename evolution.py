@@ -5,7 +5,7 @@ import shutil
 import sys
 import os
 import math
-import time as t
+import time 
 import pdb #Debugueur
 import matplotlib.pyplot as plt
 from TwisTranscripT.TSC import *
