@@ -36,31 +36,36 @@ def loadData(TSS, TTS) :
 	return (np.array(num_gene), np.array(dom_pos), np.array(gene_pos), np.array(sens))
 
 
-def writeData_init(TSS, TTS, GFF) :
+def writeData_init(TSS, TTS, GFF, PROT) :
 	f1 = open('tousgenesidentiques/TSSevol_prev.dat', 'w')
 	f2 = open('tousgenesidentiques/TTSevol_prev.dat', 'w')
-	f3 = open('tousgenesidentiques/TSSevol.dat', 'w')
-	f4 = open('tousgenesidentiques/TTSevol.dat', 'w')
+	f3 = open('tousgenesidentiques/protevol_prev.dat', 'w')
+	f4 = open('tousgenesidentiques/TSSevol.dat', 'w')
+	f5 = open('tousgenesidentiques/TTSevol.dat', 'w')
+	f6 = open('tousgenesidentiques/protevol.dat', 'w')
 	#f5 = open('tousgenesidentiques/tousgenesidentiques_evol_prev.gff', 'w')
 	#f6 = open('tousgenesidentiques/tousgenesidentiques_evol.gff', 'w')
 	f1.close()
 	f2.close()
 	f3.close()
 	f4.close()
-	#f5.close()
-	#f6.close()
+	f5.close()
+	f6.close()
 	shutil.copy(TSS,'tousgenesidentiques/TSSevol.dat')
 	shutil.copy(TTS,'tousgenesidentiques/TTSevol.dat')
+	shutil.copy(PROT,'tousgenesidentiques/protevol.dat')
 	#shutil.copy(GFF,'tousgenesidentiques/tousgenesidentiques_evol.dat')
 	#Ouvrir GFF aussi
 	
 	#GFF sert seulement à calculer la taille du génome dans TSC.py
 	
-def writeData(gene_pos, sens, num_gene, inversion=False) :
+def writeData(gene_pos, sens, num_gene, dom_pos, inversion=False) :
 	shutil.copy('tousgenesidentiques/TSSevol.dat', 'tousgenesidentiques/TSSevol_prev.dat')
 	shutil.copy('tousgenesidentiques/TTSevol.dat', 'tousgenesidentiques/TTSevol_prev.dat')
+	shutil.copy('tousgenesidentiques/protevol.dat', 'tousgenesidentiques/protevol_prev.dat')
 	f1 = open('tousgenesidentiques/TSSevol.dat', 'w')
 	f2 = open('tousgenesidentiques/TTSevol.dat', 'w')
+	f3 = open('tousgenesidentiques/protevol.dat', 'w')
 	'''
 	Dans params.ini :
 	tssevol = tousgenesidentiques/TSSevol.dat
@@ -71,6 +76,7 @@ def writeData(gene_pos, sens, num_gene, inversion=False) :
 	
 	f1.write("TUindex\tTUorient\tTSS_pos\tTSS_strength\n")
 	f2.write("TUindex\tTUorient\tTTS_pos\tTTS_proba_off\n")
+	f3.write("prot_name\tprot_pos\n")
 	for i in range(len(gene_pos)):
 		f1.write(str(num_gene[i])+'\t')
 		f2.write(str(num_gene[i])+'\t')
@@ -78,14 +84,17 @@ def writeData(gene_pos, sens, num_gene, inversion=False) :
 		f2.write(sens[i]+'\t')
 		f1.write(str(gene_pos[i,0])+'\t.2\n')#A changer pour genes différents
 		f2.write(str(gene_pos[i,1])+'\t1.\n')#Idem
+		f3.write("hns\t{}\n".format(dom_pos[i,0]))
 	f1.close()
 	f2.close()
+	f3.close()
 	#INVERSER POSITIONS TSS ET TTS POUR GENES INVERSES
 		
 def writeData_return(FILE_EVENTS):
 	print('WRITE RETURN')
 	shutil.copy('tousgenesidentiques/TSSevol_prev.dat', 'tousgenesidentiques/TSSevol.dat')
 	shutil.copy('tousgenesidentiques/TTSevol_prev.dat', 'tousgenesidentiques/TTSevol.dat')
+	shutil.copy('tousgenesidentiques/protevol_prev.dat', 'tousgenesidentiques/protevol.dat')
 	with open(FILE_EVENTS, 'rb+') as filehandle:#remove last event (ex : '2,')
 		filehandle.seek(-1, os.SEEK_END)
 		filehandle.truncate()
@@ -323,10 +332,10 @@ def random_event(dom_pos, gene_pos, sens, num_gene, q, FILE_EVENTS, FILE_FITNESS
 	#pdb.set_trace()
 	
 	choice = random.random()
-	if choice <= 1/3 :
+	if choice <= 0/3 :
 		new_dom_pos, new_gene_pos, new_sens, new_num_gene = insertion(dom_pos, gene_pos, sens, num_gene)
 		event = "0,"
-	elif choice >1/3 and choice <= 2/3 :
+	elif choice >0/3 and choice <= 0/3 :
 		new_dom_pos, new_gene_pos, new_sens, new_num_gene = deletion(dom_pos, gene_pos, sens, num_gene)
 		event = "1,"
 	else :
@@ -339,7 +348,7 @@ def random_event(dom_pos, gene_pos, sens, num_gene, q, FILE_EVENTS, FILE_FITNESS
 	line = f.readline()
 	print("All events : ", line)
 	print("Number of events : ", len(line.split(','))-1, '\n')
-	writeData(new_gene_pos, new_sens, new_num_gene)	
+	writeData(new_gene_pos, new_sens, new_num_gene, new_dom_pos)	
 	if (len(line.split(',')) == 2 ): #Write in a new fitness file if this is the first event (len([event, '']) = 2)
 		start_transcribing('params.ini')
 		first_fitness(FILE_FITNESS, event)
@@ -367,7 +376,7 @@ def main() :
 	FILE_EVENTS = "all_events_{}.txt".format(PARAMS)#Différent nom de fichier pour chaque set de paramètres
 	FILE_FITNESS = "all_fitness_{}.txt".format(PARAMS)#Différent nom de fichier pour chaque set de paramètres
 
-	writeData_init('tousgenesidentiques/TSS.dat', 'tousgenesidentiques/TTS.dat', 'tousgenesidentiques/tousgenesidentiques.gff')
+	writeData_init('tousgenesidentiques/TSS.dat', 'tousgenesidentiques/TTS.dat', 'tousgenesidentiques/tousgenesidentiques.gff', 'tousgenesidentiques/prot.dat')
 	num_gene, dom_pos, gene_pos, sens = loadData('tousgenesidentiques/TSSevol.dat', 'tousgenesidentiques/TTSevol.dat')
 
 	fitnesses = open(FILE_FITNESS, 'w')
@@ -378,7 +387,7 @@ def main() :
 		print("\nIteration : ", i+1)
 		#if i in [k*100 for k in range (int(1000/100))] :
 			#print(i)
-		dom_pos, gene_pos, sens, num_gene = random_event(dom_pos, gene_pos, sens, num_gene, 0.00001, FILE_EVENTS, FILE_FITNESS)
+		dom_pos, gene_pos, sens, num_gene = random_event(dom_pos, gene_pos, sens, num_gene, 0.01, FILE_EVENTS, FILE_FITNESS)
 		
 		'''
 		events = open(FILE_EVENTS, 'r')
@@ -394,13 +403,14 @@ def main() :
 
 		#print(gene_pos, '\n\n', dom_pos, '\n\n', sens, num_gene)
 		
-	end_time = t.time()
-	t = start_time-end_time
+	end_time = time.time()
+	t = end_time - start_time
 	s = t%60
 	r = t//60
 	m = r%60
 	r = r//60
 	h = r%24
+	print (t)
 	print('{} hours, {} minutes, {} seconds'.format(h, m, s))
 
 		
