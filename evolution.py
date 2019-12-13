@@ -252,7 +252,7 @@ def randomPos(dom_pos, gene_pos) :
 			if i == 0 :
 				if (pos < min(gene_pos[i,0] - 60, gene_pos[i,1] - 60)) : 
 					cond = True
-			if (pos > max(gene_pos[i-1][1] + 60, gene_pos[i-1][0] + 60)  and pos < min(gene_pos[i][0] - 60, gene_pos[i][1] + 60)) :
+			if (pos > max(gene_pos[i-1][1] + 60, gene_pos[i-1][0] + 60)  and pos < min(gene_pos[i][0] - 60, gene_pos[i][1] - 60)) :
 				cond = True
 			if i == len(gene_pos)-1 :
 				if (pos > max(gene_pos[i,1] + 60, gene_pos[i,0] + 60)) :
@@ -303,6 +303,10 @@ def first_fitness(FILE_FITNESS, event):
 
 #Compare and write fitness in not empty file
 def majFitness(num_gene, dom_pos, gene_pos, sens, FILE_EVENTS, FILE_FITNESS, event, q) :
+	new_dom_pos = dom_pos
+	new_gene_pos = gene_pos
+	new_sens = sens
+	new_num_gene = num_gene
 	#newfitness = fitness('output/all_tr_info.csv',"cible.dat")
 	newfitness = fitness('output/all_tr_info.csv',"environment.dat")
 	f = open(FILE_FITNESS, 'r') 
@@ -323,10 +327,10 @@ def majFitness(num_gene, dom_pos, gene_pos, sens, FILE_EVENTS, FILE_FITNESS, eve
 		
 		else : 
 			#Return to previous step
-			dom_pos, gene_pos, sens, num_gene = writeData_return(FILE_EVENTS)
+			new_dom_pos, new_gene_pos, new_sens, new_num_gene = writeData_return(FILE_EVENTS)
 	f2.close()
 	#return newfitness, num_gene, dom_pos, gene_pos, sens
-	return dom_pos, gene_pos, sens, num_gene,
+	return new_dom_pos, new_gene_pos, new_sens, new_num_gene,
 
 
 ##############
@@ -352,14 +356,16 @@ def random_event(dom_pos, gene_pos, sens, num_gene, q, FILE_EVENTS, FILE_FITNESS
 	line = f.readline()
 	print("All events : ", line)
 	print("Number of events : ", len(line.split(','))-1, '\n')
-	writeData(new_gene_pos, new_sens, new_num_gene, new_dom_pos)	
+	writeData(new_gene_pos, new_sens, new_num_gene, new_dom_pos)
+	print('AVANT TRANSCRIPTION \n',new_gene_pos, '\n', new_dom_pos)
 	if (len(line.split(',')) == 2 ): #Write in a new fitness file if this is the first event (len([event, '']) = 2)
 		start_transcribing('params.ini')
 		first_fitness(FILE_FITNESS, event)
 		#majFitness(FILE_EVENTS, FILE_FITNESS, event ,q)
 	else :
 		start_transcribing('params.ini')
-		new_dom_pos, new_gene_pos, new_sens, new_num_gene = majFitness(num_gene, dom_pos, gene_pos, sens, FILE_EVENTS, FILE_FITNESS, event ,q)
+		new_dom_pos, new_gene_pos, new_sens, new_num_gene = majFitness(new_num_gene, new_dom_pos, new_gene_pos, new_sens, FILE_EVENTS, FILE_FITNESS, event ,q)
+		print('APRES MAJ FITNESS : \n ',new_gene_pos, '\n', new_dom_pos)
 	f.close()
 	#Mettre à jour GFF
 	
@@ -405,7 +411,7 @@ def main() :
 		'''
 
 
-		#print(gene_pos, '\n\n', dom_pos, '\n\n', sens, num_gene)
+		print('FIN DE LA BOUCLE\n',gene_pos, '\n\n', dom_pos, '\n\n', sens, num_gene)
 		
 	end_time = time.time()
 	t = end_time - start_time
