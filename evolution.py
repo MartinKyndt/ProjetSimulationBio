@@ -26,6 +26,7 @@ def loadData(TSS, TTS) :
 	sens = []
 	f1 = open(TSS)
 	f2 = open(TTS)
+	#f3 = open(GFF)
 	tss = [[e for e in l[:-1].split('\t')] for l in f1.readlines()[1:]]
 	tts = [[e for e in l[:-1].split('\t')] for l in f2.readlines()[1:]]
 	for i in range(10) :
@@ -160,8 +161,11 @@ def inversion(dom_pos, gene_pos, sens, num_gene) :
 		"""print('i : ', i)
 		#print('gene position : ', gene_pos[i,0],gene_pos[i,1])
 		#print('positions of mutations : ', pos1, pos2, '\n')"""
-		if pos1 >= gene_pos[i,0] and pos1 <= gene_pos[i,1] or pos2 >= gene_pos[i,0] and pos2 <= gene_pos[i,1]:
+		
+		if pos1 >= min(gene_pos[i,0], gene_pos[i,1]) and pos1 <= max(gene_pos[i,0], gene_pos[i,1]) or pos2 >= min(gene_pos[i,0], gene_pos[i,1]) and pos2 <= max(gene_pos[i,0], gene_pos[i,1]):
+			print('Gene {} : [{}-{}], positions : [{}-{}]'.format(i, gene_pos[i,0], gene_pos[i,1], pos1, pos2))
 			sys.exit('impossible to cut the gene')
+			
 	#############################
 	#Change positions of domains#
 	#############################
@@ -246,12 +250,12 @@ def randomPos(dom_pos, gene_pos) :
 		pos = random.randint(deb,fin)
 		for i in range(len(gene_pos)):
 			if i == 0 :
-				if (pos < gene_pos[i,0] - 60) : #Distance de sécurité à gauche du premier gène
+				if (pos < min(gene_pos[i,0] - 60, gene_pos[i,1] - 60)) : 
 					cond = True
-			if(pos > gene_pos[i-1][1] + 60 and pos < gene_pos[i][0] - 60) : #Distance de sécurité entre deux gènes
+			if (pos > max(gene_pos[i-1][1] + 60, gene_pos[i-1][0] + 60)  and pos < min(gene_pos[i][0] - 60, gene_pos[i][1] + 60)) :
 				cond = True
 			if i == len(gene_pos)-1 :
-				if (pos > gene_pos[i,1] + 60) : #Distance de sécurité à droite du dernier gène
+				if (pos > max(gene_pos[i,1] + 60, gene_pos[i,0] + 60)) :
 					cond = True
 		for i in range(len(dom_pos)) : #Refuse mutations at the exact positions of barriers
 			for j in range(len(dom_pos[i])) :
@@ -332,10 +336,10 @@ def random_event(dom_pos, gene_pos, sens, num_gene, q, FILE_EVENTS, FILE_FITNESS
 	#pdb.set_trace()
 	
 	choice = random.random()
-	if choice <= 0/3 :
+	if choice <= 1/3 :
 		new_dom_pos, new_gene_pos, new_sens, new_num_gene = insertion(dom_pos, gene_pos, sens, num_gene)
 		event = "0,"
-	elif choice >0/3 and choice <= 0/3 :
+	elif choice > 1/3 and choice <= 2/3 :
 		new_dom_pos, new_gene_pos, new_sens, new_num_gene = deletion(dom_pos, gene_pos, sens, num_gene)
 		event = "1,"
 	else :
@@ -387,7 +391,7 @@ def main() :
 		print("\nIteration : ", i+1)
 		#if i in [k*100 for k in range (int(1000/100))] :
 			#print(i)
-		dom_pos, gene_pos, sens, num_gene = random_event(dom_pos, gene_pos, sens, num_gene, 0.01, FILE_EVENTS, FILE_FITNESS)
+		dom_pos, gene_pos, sens, num_gene = random_event(dom_pos, gene_pos, sens, num_gene, 0.0001, FILE_EVENTS, FILE_FITNESS)
 		
 		'''
 		events = open(FILE_EVENTS, 'r')
