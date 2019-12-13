@@ -108,8 +108,8 @@ def writeData(gene_pos, sens, num_gene, dom_pos) :
 		f2.write(str(num_gene[i])+'\t')
 		f1.write(sens[i]+'\t')
 		f2.write(sens[i]+'\t')
-		f1.write(str(gene_pos[i,0])+'\t.2\n')#A changer pour genes différents
-		f2.write(str(gene_pos[i,1])+'\t1.\n')#Idem
+		f1.write(str(gene_pos[i,0])+'\t.2\n')
+		f2.write(str(gene_pos[i,1])+'\t1.\n')
 		f3.write("hns\t{}\n".format(dom_pos[i,0]))
 	f1.close()
 	f2.close()
@@ -132,8 +132,6 @@ def writeData(gene_pos, sens, num_gene, dom_pos) :
 	for i in range(len(contenu)):
 		f5.write(sep.join(contenu[i]))	
 	f5.close()
-	
-	#INVERSER POSITIONS TSS ET TTS POUR GENES INVERSES
 
 		
 def writeData_return(FILE_EVENTS):
@@ -302,6 +300,7 @@ def randomPos(dom_pos, gene_pos) :
 			if i == len(gene_pos)-1 :
 				if (pos > max(gene_pos[i,1] + 60, gene_pos[i,0] + 60)) :
 					cond = True
+
 		for i in range(len(dom_pos)) : #Refuse mutations at the exact positions of barriers
 			for j in range(len(dom_pos[i])) :
 				if pos == dom_pos[i, j] :
