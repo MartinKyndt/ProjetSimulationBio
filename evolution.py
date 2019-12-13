@@ -19,21 +19,47 @@ print('Ceci est notre code')
 
 #Ecrit les données TSS et TTS dans l'ordre : 
 #debut de domaine, debut de gene, fin de gene, fin de domaine
-def loadData(TSS, TTS) :
+def writeData_init(TSS, TTS, GFF) :
+	f1 = open('tousgenesidentiques/TSSevol_prev.dat', 'w')
+	f2 = open('tousgenesidentiques/TTSevol_prev.dat', 'w')
+	f3 = open('tousgenesidentiques/TSSevol.dat', 'w')
+	f4 = open('tousgenesidentiques/TTSevol.dat', 'w')
+	f5 = open('tousgenesidentiques/tousgenesidentiques_evol_prev.gff', 'w')
+	f6 = open('tousgenesidentiques/tousgenesidentiques_evol.gff', 'w')
+	f1.close()
+	f2.close()
+	f3.close()
+	f4.close()
+	f5.close()
+	f6.close()
+	shutil.copy(TSS,'tousgenesidentiques/TSSevol.dat')
+	shutil.copy(TTS,'tousgenesidentiques/TTSevol.dat')
+	shutil.copy(GFF,'tousgenesidentiques/tousgenesidentiques_evol.gff')
+
+
+def loadData(TSS, TTS, PROT, GFF) :
 	num_gene = []
 	gene_pos = []
 	dom_pos = []
 	sens = []
 	f1 = open(TSS)
 	f2 = open(TTS)
-	#f3 = open(GFF)
+	f3 = open(PROT)
+	f4 = open(GFF)
 	tss = [[e for e in l[:-1].split('\t')] for l in f1.readlines()[1:]]
 	tts = [[e for e in l[:-1].split('\t')] for l in f2.readlines()[1:]]
+	prot = [[e for e in l[:-1].split('\t')] for l in f3.readlines()[1:]]
+	gff = f4.readlines()[4].split('\t')
+	fin = int(gff[4])
+	print(fin)
 	for i in range(10) :
 		num_gene.append(i)
-		dom_pos.append([(3000*i)+1, 3000*(i+1)])#A changer quand on aura des genes de taille différente
 		gene_pos.append([int(tss[i][2]),int(tts[i][2])])
 		sens.append(tss[i][1])
+		if i != 9:
+			dom_pos.append([int(prot[i][1]), int(prot[i+1][1])-1])
+		else:
+			dom_pos.append([int(prot[i][1]), fin])
 	return (np.array(num_gene), np.array(dom_pos), np.array(gene_pos), np.array(sens))
 
 
@@ -44,26 +70,26 @@ def writeData_init(TSS, TTS, GFF, PROT) :
 	f4 = open('tousgenesidentiques/TSSevol.dat', 'w')
 	f5 = open('tousgenesidentiques/TTSevol.dat', 'w')
 	f6 = open('tousgenesidentiques/protevol.dat', 'w')
-	#f5 = open('tousgenesidentiques/tousgenesidentiques_evol_prev.gff', 'w')
-	#f6 = open('tousgenesidentiques/tousgenesidentiques_evol.gff', 'w')
+	f7 = open('tousgenesidentiques/tousgenesidentiques_evol_prev.gff', 'w')
+	f8 = open('tousgenesidentiques/tousgenesidentiques_evol.gff', 'w')
 	f1.close()
 	f2.close()
 	f3.close()
 	f4.close()
 	f5.close()
 	f6.close()
+	f7.close()
+	f8.close()
 	shutil.copy(TSS,'tousgenesidentiques/TSSevol.dat')
 	shutil.copy(TTS,'tousgenesidentiques/TTSevol.dat')
 	shutil.copy(PROT,'tousgenesidentiques/protevol.dat')
-	#shutil.copy(GFF,'tousgenesidentiques/tousgenesidentiques_evol.dat')
-	#Ouvrir GFF aussi
+	shutil.copy(GFF,'tousgenesidentiques/tousgenesidentiques_evol.gff')
 	
-	#GFF sert seulement à calculer la taille du génome dans TSC.py
-	
-def writeData(gene_pos, sens, num_gene, dom_pos, inversion=False) :
+def writeData(gene_pos, sens, num_gene, dom_pos) :
 	shutil.copy('tousgenesidentiques/TSSevol.dat', 'tousgenesidentiques/TSSevol_prev.dat')
 	shutil.copy('tousgenesidentiques/TTSevol.dat', 'tousgenesidentiques/TTSevol_prev.dat')
 	shutil.copy('tousgenesidentiques/protevol.dat', 'tousgenesidentiques/protevol_prev.dat')
+	shutil.copy('tousgenesidentiques/tousgenesidentiques_evol.gff', 'tousgenesidentiques/tousgenesidentiques_evol_prev.gff')
 	f1 = open('tousgenesidentiques/TSSevol.dat', 'w')
 	f2 = open('tousgenesidentiques/TTSevol.dat', 'w')
 	f3 = open('tousgenesidentiques/protevol.dat', 'w')
@@ -73,12 +99,11 @@ def writeData(gene_pos, sens, num_gene, dom_pos, inversion=False) :
 	ttsevol = tousgenesidentiques/TTSevol.dat
 	Il faut changer le format  de TSSevol et TTSevol (pd.dataframe) pour que la ligne 557 de TSC.py puisse s'exécuter et lire le fichier correctement
 	'''
-	
-	
 	f1.write("TUindex\tTUorient\tTSS_pos\tTSS_strength\n")
 	f2.write("TUindex\tTUorient\tTTS_pos\tTTS_proba_off\n")
 	f3.write("prot_name\tprot_pos\n")
-	for i in range(len(gene_pos)):
+	n = len(gene_pos)
+	for i in range(n):
 		f1.write(str(num_gene[i])+'\t')
 		f2.write(str(num_gene[i])+'\t')
 		f1.write(sens[i]+'\t')
@@ -89,21 +114,41 @@ def writeData(gene_pos, sens, num_gene, dom_pos, inversion=False) :
 	f1.close()
 	f2.close()
 	f3.close()
+	
+	f4 = open('tousgenesidentiques/tousgenesidentiques_evol.gff', 'r')
+	contenu = [[e for e in l.split('\t')] for l in f4.readlines()]
+	f4.close()
+	
+	contenu[3] = ['##sequence-region tousgenesidentiques' + str(dom_pos[0][0])+ ' ' + str(dom_pos[-1][1]) + '\n']
+	contenu[4][3] = str(dom_pos[0,0])
+	contenu[4][4] = str(dom_pos[-1,1])
+	for i in range(n):
+		contenu[i+5][3] = str(gene_pos[i,0])
+		contenu[i+5][4] = str(gene_pos[i,1])
+		contenu[i+5][6] = sens[i]
+	
+	f5 = open('tousgenesidentiques/tousgenesidentiques_evol.gff', 'w')
+	sep='\t'
+	for i in range(len(contenu)):
+		f5.write(sep.join(contenu[i]))	
+	f5.close()
+	
 	#INVERSER POSITIONS TSS ET TTS POUR GENES INVERSES
+
 		
 def writeData_return(FILE_EVENTS):
 	print('WRITE RETURN')
 	shutil.copy('tousgenesidentiques/TSSevol_prev.dat', 'tousgenesidentiques/TSSevol.dat')
 	shutil.copy('tousgenesidentiques/TTSevol_prev.dat', 'tousgenesidentiques/TTSevol.dat')
+	shutil.copy('tousgenesidentiques/tousgenesidentiques_evol_prev.gff', 'tousgenesidentiques/tousgenesidentiques_evol.gff')
 	shutil.copy('tousgenesidentiques/protevol_prev.dat', 'tousgenesidentiques/protevol.dat')
 	with open(FILE_EVENTS, 'rb+') as filehandle:#remove last event (ex : '2,')
 		filehandle.seek(-1, os.SEEK_END)
 		filehandle.truncate()
 		filehandle.seek(-1, os.SEEK_END)
 		filehandle.truncate()
-	num_gene, dom_pos, gene_pos, sens = loadData('tousgenesidentiques/TSSevol.dat', 'tousgenesidentiques/TTSevol.dat')
+	num_gene, dom_pos, gene_pos, sens = loadData('tousgenesidentiques/TSSevol.dat', 'tousgenesidentiques/TTSevol.dat', 'tousgenesidentiques/protevol.dat', 'tousgenesidentiques/tousgenesidentiques_evol.gff')
 	return  dom_pos, gene_pos, sens, num_gene
-	#Mettre à jour GFF
 
 
 #########################
@@ -134,12 +179,12 @@ def deletion(dom_pos, gene_pos, sens, num_gene) :
 	pos = randomPos(dom_pos, gene_pos)
 	for i in range(len(gene_pos)) :
 		for j in range(len(gene_pos[i])) :
-			if gene_pos[i][j] >= pos :
-				gene_pos[i][j] -= 1
+			if gene_pos[i,j] >= pos :
+				gene_pos[i,j] -= 1
 	for i in range(len(dom_pos)) :
 		for j in range(len(dom_pos[i])) :
-			if dom_pos[i][j] >= pos :
-				dom_pos[i][j] -= 1
+			if dom_pos[i,j] >= pos :
+				dom_pos[i,j] -= 1
 	print('\nDELETION : {}\n'.format(pos))
 	return (dom_pos, gene_pos, sens, num_gene)	
 			
@@ -263,8 +308,6 @@ def randomPos(dom_pos, gene_pos) :
 					cond = False
 	return pos
 	
-
-	
 	
 #########
 #FITNESS#
@@ -280,7 +323,7 @@ def fitness(result, expected) :
 	'''print("\n\n\nEXPRESSION PROFILE \n")
 	print(res)'''
 	sum_transcripts = sum([int(line[7]) for line in res[1:]])
-	#print(sum_transcripts)
+	
 	exp = [[e for e in l[:-1].split()] for l in f2.readlines()[0:]]
 	'''print("\nEXPECTED PROFILE \n")
 	print(exp)'''
@@ -367,9 +410,7 @@ def random_event(dom_pos, gene_pos, sens, num_gene, q, FILE_EVENTS, FILE_FITNESS
 		new_dom_pos, new_gene_pos, new_sens, new_num_gene = majFitness(new_num_gene, new_dom_pos, new_gene_pos, new_sens, FILE_EVENTS, FILE_FITNESS, event ,q)
 		print('APRES MAJ FITNESS : \n ',new_gene_pos, '\n', new_dom_pos)
 	f.close()
-	#Mettre à jour GFF
-	
-	
+	print("DOMAINES après\n\n", new_dom_pos, "\n\n")
 	return(new_dom_pos, new_gene_pos, new_sens, new_num_gene)
 
 ################
@@ -377,8 +418,6 @@ def random_event(dom_pos, gene_pos, sens, num_gene, q, FILE_EVENTS, FILE_FITNESS
 ################
 
 def main() :
-
-	
 	#Initiation of clock
 	start_time = time.time()
 		
@@ -387,13 +426,14 @@ def main() :
 	FILE_FITNESS = "all_fitness_{}.txt".format(PARAMS)#Différent nom de fichier pour chaque set de paramètres
 
 	writeData_init('tousgenesidentiques/TSS.dat', 'tousgenesidentiques/TTS.dat', 'tousgenesidentiques/tousgenesidentiques.gff', 'tousgenesidentiques/prot.dat')
-	num_gene, dom_pos, gene_pos, sens = loadData('tousgenesidentiques/TSSevol.dat', 'tousgenesidentiques/TTSevol.dat')
+	num_gene, dom_pos, gene_pos, sens = loadData('tousgenesidentiques/TSSevol.dat', 'tousgenesidentiques/TTSevol.dat', 'tousgenesidentiques/protevol.dat', 'tousgenesidentiques/tousgenesidentiques_evol.gff')
 
 	fitnesses = open(FILE_FITNESS, 'w')
 	fitnesses.close()
 	events = open(FILE_EVENTS, 'w')
 	events.close()
 	for i in range(100) :
+		print("DOMAINES avant \n\n", dom_pos, "\n\n")
 		print("\nIteration : ", i+1)
 		#if i in [k*100 for k in range (int(1000/100))] :
 			#print(i)
@@ -411,7 +451,8 @@ def main() :
 		'''
 
 
-		print('FIN DE LA BOUCLE\n',gene_pos, '\n\n', dom_pos, '\n\n', sens, num_gene)
+		#print(gene_pos, '\n\n', dom_pos, '\n\n', sens, num_gene)
+
 		
 	end_time = time.time()
 	t = end_time - start_time
@@ -423,10 +464,6 @@ def main() :
 	print (t)
 	print('{} hours, {} minutes, {} seconds'.format(h, m, s))
 
-		
 
-if __name__ == "__main__" : 
-#boumboumboum 
+if __name__ == "__main__" :
 	main()
-	
-
