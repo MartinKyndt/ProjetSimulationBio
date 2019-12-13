@@ -37,21 +37,29 @@ def writeData_init(TSS, TTS, GFF) :
 	shutil.copy(GFF,'tousgenesidentiques/tousgenesidentiques_evol.gff')
 
 
-def loadData(TSS, TTS) :
+def loadData(TSS, TTS, PROT, GFF) :
 	num_gene = []
 	gene_pos = []
 	dom_pos = []
 	sens = []
 	f1 = open(TSS)
 	f2 = open(TTS)
-	#f3 = open(GFF)
+	f3 = open(PROT)
+	f4 = open(GFF)
 	tss = [[e for e in l[:-1].split('\t')] for l in f1.readlines()[1:]]
 	tts = [[e for e in l[:-1].split('\t')] for l in f2.readlines()[1:]]
+	prot = [[e for e in l[:-1].split('\t')] for l in f3.readlines()[1:]]
+	gff = f4.readlines()[4].split('\t')
+	fin = int(gff[4])
+	print(fin)
 	for i in range(10) :
 		num_gene.append(i)
-		dom_pos.append([(3000*i)+1, 3000*(i+1)])#A changer quand on aura des genes de taille différente
 		gene_pos.append([int(tss[i][2]),int(tts[i][2])])
 		sens.append(tss[i][1])
+		if i != 9:
+			dom_pos.append([int(prot[i][1]), int(prot[i+1][1])-1])
+		else:
+			dom_pos.append([int(prot[i][1]), fin])
 	return (np.array(num_gene), np.array(dom_pos), np.array(gene_pos), np.array(sens))
 
 
@@ -139,7 +147,7 @@ def writeData_return(FILE_EVENTS):
 		filehandle.truncate()
 		filehandle.seek(-1, os.SEEK_END)
 		filehandle.truncate()
-	num_gene, dom_pos, gene_pos, sens = loadData('tousgenesidentiques/TSSevol.dat', 'tousgenesidentiques/TTSevol.dat')
+	num_gene, dom_pos, gene_pos, sens = loadData('tousgenesidentiques/TSSevol.dat', 'tousgenesidentiques/TTSevol.dat', 'tousgenesidentiques/protevol.dat', 'tousgenesidentiques/tousgenesidentiques_evol.gff')
 	return  dom_pos, gene_pos, sens, num_gene
 
 
@@ -315,7 +323,7 @@ def fitness(result, expected) :
 	'''print("\n\n\nEXPRESSION PROFILE \n")
 	print(res)'''
 	sum_transcripts = sum([int(line[7]) for line in res[1:]])
-	#print(sum_transcripts)
+	
 	exp = [[e for e in l[:-1].split()] for l in f2.readlines()[0:]]
 	'''print("\nEXPECTED PROFILE \n")
 	print(exp)'''
@@ -412,7 +420,7 @@ def main() :
 	FILE_FITNESS = "all_fitness_{}.txt".format(PARAMS)#Différent nom de fichier pour chaque set de paramètres
 
 	writeData_init('tousgenesidentiques/TSS.dat', 'tousgenesidentiques/TTS.dat', 'tousgenesidentiques/tousgenesidentiques.gff', 'tousgenesidentiques/prot.dat')
-	num_gene, dom_pos, gene_pos, sens = loadData('tousgenesidentiques/TSSevol.dat', 'tousgenesidentiques/TTSevol.dat')
+	num_gene, dom_pos, gene_pos, sens = loadData('tousgenesidentiques/TSSevol.dat', 'tousgenesidentiques/TTSevol.dat', 'tousgenesidentiques/protevol.dat', 'tousgenesidentiques/tousgenesidentiques_evol.gff')
 
 	fitnesses = open(FILE_FITNESS, 'w')
 	fitnesses.close()
@@ -451,5 +459,3 @@ def main() :
 
 if __name__ == "__main__" :
 	main()
-	
-
