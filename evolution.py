@@ -315,6 +315,7 @@ def randomPos(dom_pos, gene_pos) :
 
 
 def fitness(result, expected) : 
+	"""
 	obs = [] 
 	cible = [] 
 	f1 = open(result)
@@ -336,7 +337,32 @@ def fitness(result, expected) :
 		fitness += abs(math.log(obs[i]/cible[i]))
 	fitness = math.exp(-fitness)
 	return(fitness)
+	""" 
+	
+	obs = pd.read_csv( 'output/all_tr_info.csv', sep = '	')
+	cible = pd.read_csv('environment.dat', sep = '	')
+	
+	#keep in memory the order of the transcript unit
+	transcripts_index = obs['TUindex'].tolist() 
+	#sum of the number of observed transcripts
+	total_nb_transcripts = obs.sum(axis=0)[7] 
+	
+	#calculate the rate of transcript of each gene
+	obs['rate']= obs['number of transcripts generated']/total_nb_transcripts
+	
+	#join observed and expected dataset, according to the TUindex
+	obs = obs.set_index('TUindex').join(cible.set_index('TUindex'), how= 'inner')
+	
+	#calculate the fitness
+	obs['fitness'] = (obs['rate']/obs['expected_rate'])
+	f = obs['fitness'].tolist()
+	log = list(map(math.log, f))
 
+	fitness = list(map(lambda x : math.exp(-x), log))
+	
+	#return the fitness
+	return(sum(fitness))
+	
 #Write fitness in empty file
 def first_fitness(FILE_FITNESS, event):
 	f = open(FILE_FITNESS, 'a')
