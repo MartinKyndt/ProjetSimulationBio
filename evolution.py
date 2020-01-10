@@ -336,7 +336,6 @@ def fitness(result, expected) :
 		fitness += abs(math.log(obs[i]/cible[i]))
 	fitness = math.exp(-fitness)
 	return(fitness)
-<<<<<<< HEAD
 	""" 
 	
 	obs = pd.read_csv( 'output/all_tr_info.csv', sep = '	')
@@ -362,9 +361,7 @@ def fitness(result, expected) :
 	
 	#return the fitness
 	return(sum(fitness))
-=======
->>>>>>> c75317cc4afa991a59edb6907b6b8d15cac0c4ab
-	
+
 #Write fitness in empty file
 def first_fitness(FILE_FITNESS, event):
 	f = open(FILE_FITNESS, 'a')
