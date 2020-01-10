@@ -109,8 +109,8 @@ def writeData(gene_pos, sens, num_gene, dom_pos) :
 		f2.write(str(num_gene[i])+'\t')
 		f1.write(sens[i]+'\t')
 		f2.write(sens[i]+'\t')
-		f1.write(str(gene_pos[i,0])+'\t.2\n')#A changer pour genes différents
-		f2.write(str(gene_pos[i,1])+'\t1.\n')#Idem
+		f1.write(str(gene_pos[i,0])+'\t.2\n')
+		f2.write(str(gene_pos[i,1])+'\t1.\n')
 		f3.write("hns\t{}\n".format(dom_pos[i,0]))
 	f1.close()
 	f2.close()
@@ -132,8 +132,6 @@ def writeData(gene_pos, sens, num_gene, dom_pos) :
 	for i in range(len(contenu)):
 		f5.write(sep.join(contenu[i]))	
 	f5.close()
-	
-	#INVERSER POSITIONS TSS ET TTS POUR GENES INVERSES
 
 		
 def writeData_return(FILE_EVENTS):
@@ -297,11 +295,12 @@ def randomPos(dom_pos, gene_pos) :
 			if i == 0 :
 				if (pos < min(gene_pos[i,0] - 60, gene_pos[i,1] - 60)) : 
 					cond = True
-			if (pos > max(gene_pos[i-1][1] + 60, gene_pos[i-1][0] + 60)  and pos < min(gene_pos[i][0] - 60, gene_pos[i][1] + 60)) :
+			if (pos > max(gene_pos[i-1][1] + 60, gene_pos[i-1][0] + 60)  and pos < min(gene_pos[i][0] - 60, gene_pos[i][1] - 60)) :
 				cond = True
 			if i == len(gene_pos)-1 :
 				if (pos > max(gene_pos[i,1] + 60, gene_pos[i,0] + 60)) :
 					cond = True
+
 		for i in range(len(dom_pos)) : #Refuse mutations at the exact positions of barriers
 			for j in range(len(dom_pos[i])) :
 				if pos == dom_pos[i, j] :
@@ -337,6 +336,7 @@ def fitness(result, expected) :
 		fitness += abs(math.log(obs[i]/cible[i]))
 	fitness = math.exp(-fitness)
 	return(fitness)
+<<<<<<< HEAD
 	""" 
 	
 	obs = pd.read_csv( 'output/all_tr_info.csv', sep = '	')
@@ -362,6 +362,8 @@ def fitness(result, expected) :
 	
 	#return the fitness
 	return(sum(fitness))
+=======
+>>>>>>> c75317cc4afa991a59edb6907b6b8d15cac0c4ab
 	
 #Write fitness in empty file
 def first_fitness(FILE_FITNESS, event):
@@ -372,10 +374,18 @@ def first_fitness(FILE_FITNESS, event):
 
 #Compare and write fitness in not empty file
 def majFitness(num_gene, dom_pos, gene_pos, sens, FILE_EVENTS, FILE_FITNESS, event, q) :
+	new_dom_pos = dom_pos
+	new_gene_pos = gene_pos
+	new_sens = sens
+	new_num_gene = num_gene
 	#newfitness = fitness('output/all_tr_info.csv',"cible.dat")
 	newfitness = fitness('output/all_tr_info.csv',"environment.dat")
 	f = open(FILE_FITNESS, 'r') 
 	t = [[e for e in l[:-1].split(':')] for l in f.readlines()[0:]] #event : fitness
+	f3 = open(FILE_FITNESS, 'r')
+	lines = f3.readlines()
+	last_line = lines[len(lines)-1]
+	f3.close()
 	f2 = open(FILE_FITNESS, 'a')
 	f = open(FILE_EVENTS, 'r')
 	line = f.readline()
@@ -392,10 +402,11 @@ def majFitness(num_gene, dom_pos, gene_pos, sens, FILE_EVENTS, FILE_FITNESS, eve
 		
 		else : 
 			#Return to previous step
-			dom_pos, gene_pos, sens, num_gene = writeData_return(FILE_EVENTS)
+			new_dom_pos, new_gene_pos, new_sens, new_num_gene = writeData_return(FILE_EVENTS)
+			f2.write('\n'+last_line)
 	f2.close()
 	#return newfitness, num_gene, dom_pos, gene_pos, sens
-	return dom_pos, gene_pos, sens, num_gene,
+	return new_dom_pos, new_gene_pos, new_sens, new_num_gene,
 
 
 ##############
@@ -421,16 +432,18 @@ def random_event(dom_pos, gene_pos, sens, num_gene, q, FILE_EVENTS, FILE_FITNESS
 	line = f.readline()
 	print("All events : ", line)
 	print("Number of events : ", len(line.split(','))-1, '\n')
-	writeData(new_gene_pos, new_sens, new_num_gene, new_dom_pos)	
+	writeData(new_gene_pos, new_sens, new_num_gene, new_dom_pos)
+	#print('AVANT TRANSCRIPTION \n',new_gene_pos, '\n', new_dom_pos)
 	if (len(line.split(',')) == 2 ): #Write in a new fitness file if this is the first event (len([event, '']) = 2)
 		start_transcribing('params.ini')
 		first_fitness(FILE_FITNESS, event)
 		#majFitness(FILE_EVENTS, FILE_FITNESS, event ,q)
 	else :
 		start_transcribing('params.ini')
-		new_dom_pos, new_gene_pos, new_sens, new_num_gene = majFitness(num_gene, dom_pos, gene_pos, sens, FILE_EVENTS, FILE_FITNESS, event ,q)
+		new_dom_pos, new_gene_pos, new_sens, new_num_gene = majFitness(new_num_gene, new_dom_pos, new_gene_pos, new_sens, FILE_EVENTS, FILE_FITNESS, event ,q)
+		#print('APRES MAJ FITNESS : \n ',new_gene_pos, '\n', new_dom_pos)
 	f.close()
-	print("DOMAINES après\n\n", new_dom_pos, "\n\n")
+	#print("DOMAINES après\n\n", new_dom_pos, "\n\n")
 	return(new_dom_pos, new_gene_pos, new_sens, new_num_gene)
 
 ################
@@ -453,7 +466,7 @@ def main() :
 	events = open(FILE_EVENTS, 'w')
 	events.close()
 	for i in range(100) :
-		print("DOMAINES avant \n\n", dom_pos, "\n\n")
+		#print("DOMAINES avant \n\n", dom_pos, "\n\n")
 		print("\nIteration : ", i+1)
 		#if i in [k*100 for k in range (int(1000/100))] :
 			#print(i)
@@ -470,7 +483,9 @@ def main() :
 		plt.show()
 		'''
 
+
 		#print(gene_pos, '\n\n', dom_pos, '\n\n', sens, num_gene)
+
 		
 	end_time = time.time()
 	t = end_time - start_time
