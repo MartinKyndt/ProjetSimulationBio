@@ -425,6 +425,7 @@ def main() :
 	#Initiation of clock
 	start_time = time.time()
 		
+	#PARAMS = [noExperience, noSimulation(défini par set de paramètres pour expériences taux d'expression) , q, taux_inv, taux_inser, taux_inver]
 	PARAMS = "abc"
 	FILE_EVENTS = "all_events_{}.txt".format(PARAMS)#Différent nom de fichier pour chaque set de paramètres
 	FILE_FITNESS = "all_fitness_{}.txt".format(PARAMS)#Différent nom de fichier pour chaque set de paramètres
@@ -436,7 +437,7 @@ def main() :
 	fitnesses.close()
 	events = open(FILE_EVENTS, 'w')
 	events.close()
-	for i in range(100) :
+	for i in range(1000) :
 		#print("DOMAINES avant \n\n", dom_pos, "\n\n")
 		print("\nIteration : ", i+1)
 		#if i in [k*100 for k in range (int(1000/100))] :
