@@ -442,7 +442,6 @@ def random_event(dom_pos, gene_pos, sens, num_gene, q, FILE_EVENTS, FILE_FITNESS
 	#print("DOMAINES après\n\n", new_dom_pos, "\n\n")
 	return(new_dom_pos, new_gene_pos, new_sens, new_num_gene)
 
-	
 #############
 #EXPERIENCES#
 #############
@@ -453,9 +452,35 @@ def exp_1() :
 	for q in qs : #Le 1 des parametres signifie que c'est la première répétition
 		PARAMS = "1_" + str(q) + "_" + str(1) + "_" + str(round(1/3, 2)) #1/3 = proba d'inversion
 		main(PARAMS, q, 1000)
-
+		
 def exp_2() : 
-	probs = [0.1]
+
+	prob = 0.1
+	q = 0.0001
+	PARAMS = "1_" + str(q) + "_" + str(1) + "_" + str(round(prob, 2)) 
+	global proba
+	proba = prob
+	main(PARAMS, q, 2)
+		
+def exp_3() : 
+	prob = 0.2
+	q = 0.0001
+	PARAMS = "1_" + str(q) + "_" + str(1) + "_" + str(round(prob, 2)) 
+	global proba
+	proba = prob
+	main(PARAMS, q, 2)
+
+def exp_4() : 
+	probs = [0.3,0.4,0.5,0.6]
+	q = 0.0001
+	for prob in probs : 
+		PARAMS = "1_" + str(q) + "_" + str(1) + "_" + str(round(prob, 2)) 
+		global proba
+		proba = prob
+		main(PARAMS, q, 2)
+		
+def exp_5() : 
+	probs = [0.7,0.8,0.9]
 	q = 0.0001
 	for prob in probs : 
 		PARAMS = "1_" + str(q) + "_" + str(1) + "_" + str(round(prob, 2)) 
