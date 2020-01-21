@@ -357,10 +357,8 @@ def fitness(result, expected) :
 	f = obs['fitness'].tolist()
 	log = list(map(math.log, f))
 
-	fitness = list(map(lambda x : math.exp(-x), log))
-	
 	#return the fitness
-	return(sum(fitness))
+	return(math.exp(-sum(log)))
 
 #Write fitness in empty file
 def first_fitness(FILE_FITNESS, event):
@@ -442,17 +440,27 @@ def random_event(dom_pos, gene_pos, sens, num_gene, q, FILE_EVENTS, FILE_FITNESS
 	f.close()
 	#print("DOMAINES après\n\n", new_dom_pos, "\n\n")
 	return(new_dom_pos, new_gene_pos, new_sens, new_num_gene)
+	
+#############
+#EXPERIENCES#
+#############
+
+#Effet du q sur l'évolution de la fitness --> avec l'historique des fitness, on mesure le dfit/dt en fonction du q et la fitness maximale et finale atteinte en moyenne sur 9 simulation par q
+def exp_1() :
+	qs = [0.00001, 0.00005, 0.0001, 0.0005, 0.001, 0.005]
+	for q in qs : #Le 1 des parametres signifie que c'est la première répétition
+		PARAMS = "1_" + str(q) + "_" + str(1) + "_" + str(round(1/3, 2)) #1/3 = proba d'inversion
+		main(PARAMS, q, 1000)
 
 ################
 #TESTS METHODES#
 ################
 
-def main() :
+def main(PARAMS, q, nbgeneration) :
 	#Initiation of clock
 	start_time = time.time()
 		
 	#PARAMS = [noExperience, noSimulation(défini par set de paramètres pour expériences taux d'expression) , q, taux_inv, taux_inser, taux_inver]
-	PARAMS = "abc"
 	FILE_EVENTS = "all_events_{}.txt".format(PARAMS)#Différent nom de fichier pour chaque set de paramètres
 	FILE_FITNESS = "all_fitness_{}.txt".format(PARAMS)#Différent nom de fichier pour chaque set de paramètres
 
@@ -463,28 +471,9 @@ def main() :
 	fitnesses.close()
 	events = open(FILE_EVENTS, 'w')
 	events.close()
-	for i in range(1000) :
-		#print("DOMAINES avant \n\n", dom_pos, "\n\n")
+	for i in range(nbgeneration) :
 		print("\nIteration : ", i+1)
-		#if i in [k*100 for k in range (int(1000/100))] :
-			#print(i)
-		dom_pos, gene_pos, sens, num_gene = random_event(dom_pos, gene_pos, sens, num_gene, 0.0001, FILE_EVENTS, FILE_FITNESS)
-		
-		'''
-		events = open(FILE_EVENTS, 'r')
-		for line in events :
-			all_events = line.split(',')
-			all_events.pop()
-			events_tab = [int(i) for i in all_events]
-		x = np.arange(len(events_tab))
-		plt.plot(x, events_tab)
-		plt.show()
-		'''
-
-
-		#print(gene_pos, '\n\n', dom_pos, '\n\n', sens, num_gene)
-
-		
+		dom_pos, gene_pos, sens, num_gene = random_event(dom_pos, gene_pos, sens, num_gene, q, FILE_EVENTS, FILE_FITNESS)
 	end_time = time.time()
 	t = end_time - start_time
 	s = t%60
@@ -497,4 +486,11 @@ def main() :
 
 
 if __name__ == "__main__" :
-	main()
+	PARAMS = "abc"
+	main(PARAMS, 0.0001, 100)
+	#exp_1()
+	#exp_2()
+	#exp_3()
+	#exp_4()
+	#exp_5()
+	#exp_6()
