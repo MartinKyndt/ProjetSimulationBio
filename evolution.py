@@ -356,9 +356,9 @@ def fitness(result, expected) :
 	obs['fitness'] = (obs['rate']/obs['expected_rate'])
 	f = obs['fitness'].tolist()
 	log = list(map(math.log, f))
-
+	abslog = list(map(abs,log))
 	#return the fitness
-	return(math.exp(-sum(log)))
+	return(math.exp(-sum(abslog)))
 
 #Write fitness in empty file
 def first_fitness(FILE_FITNESS, event):
@@ -440,6 +440,7 @@ def random_event(dom_pos, gene_pos, sens, num_gene, q, FILE_EVENTS, FILE_FITNESS
 	f.close()
 	#print("DOMAINES après\n\n", new_dom_pos, "\n\n")
 	return(new_dom_pos, new_gene_pos, new_sens, new_num_gene)
+
 	
 #############
 #EXPERIENCES#
@@ -452,11 +453,14 @@ def exp_1() :
 		PARAMS = "1_" + str(q) + "_" + str(1) + "_" + str(round(1/3, 2)) #1/3 = proba d'inversion
 		main(PARAMS, q, 1000)
 
+
 ################
 #TESTS METHODES#
 ################
 
+
 def main(PARAMS, q, nbgeneration) :
+
 	#Initiation of clock
 	start_time = time.time()
 		
@@ -471,7 +475,9 @@ def main(PARAMS, q, nbgeneration) :
 	fitnesses.close()
 	events = open(FILE_EVENTS, 'w')
 	events.close()
+
 	for i in range(nbgeneration) :
+
 		print("\nIteration : ", i+1)
 		dom_pos, gene_pos, sens, num_gene = random_event(dom_pos, gene_pos, sens, num_gene, q, FILE_EVENTS, FILE_FITNESS)
 	end_time = time.time()
@@ -494,3 +500,4 @@ if __name__ == "__main__" :
 	#exp_4()
 	#exp_5()
 	#exp_6()
+
