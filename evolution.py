@@ -455,7 +455,7 @@ def exp_1() :
 		main(PARAMS, q, 1000)
 
 def exp_2() : 
-	probs = [1/3, 1/4, 1/5]
+	probs = [0.1]
 	q = 0.0001
 	for prob in probs : 
 		PARAMS = "1_" + str(q) + "_" + str(1) + "_" + str(round(prob, 2)) 
