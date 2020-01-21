@@ -16,6 +16,7 @@ print('Ceci est notre code')
 ####################################
 #ECRITURE ET LA LECTURE DE FICHIERS#
 ####################################
+proba = 1/3
 
 #Ecrit les données TSS et TTS dans l'ordre : 
 #debut de domaine, debut de gene, fin de gene, fin de domaine
@@ -411,10 +412,10 @@ def random_event(dom_pos, gene_pos, sens, num_gene, q, FILE_EVENTS, FILE_FITNESS
 	#pdb.set_trace()
 	
 	choice = random.random()
-	if choice <= 1/3 :
+	if choice <= proba :
 		new_dom_pos, new_gene_pos, new_sens, new_num_gene = insertion(dom_pos, gene_pos, sens, num_gene)
 		event = "0,"
-	elif choice > 1/3 and choice <= 2/3 :
+	elif choice > proba and choice <= 2*proba :
 		new_dom_pos, new_gene_pos, new_sens, new_num_gene = deletion(dom_pos, gene_pos, sens, num_gene)
 		event = "1,"
 	else :
@@ -453,7 +454,15 @@ def exp_1() :
 		PARAMS = "1_" + str(q) + "_" + str(1) + "_" + str(round(1/3, 2)) #1/3 = proba d'inversion
 		main(PARAMS, q, 1000)
 
-
+def exp_2() : 
+	probs = [1/3, 1/4, 1/5]
+	q = 0.0001
+	for prob in probs : 
+		PARAMS = "1_" + str(q) + "_" + str(1) + "_" + str(round(prob, 2)) 
+		global proba
+		proba = prob
+		main(PARAMS, q, 2)
+		
 ################
 #TESTS METHODES#
 ################
@@ -492,10 +501,10 @@ def main(PARAMS, q, nbgeneration) :
 
 
 if __name__ == "__main__" :
-	PARAMS = "abc"
-	main(PARAMS, 0.0001, 100)
+	#PARAMS = "abc"
+	#main(PARAMS, 0.0001, 100)
 	#exp_1()
-	#exp_2()
+	exp_2()
 	#exp_3()
 	#exp_4()
 	#exp_5()
