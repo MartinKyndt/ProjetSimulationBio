@@ -20,6 +20,7 @@ proba = 1/3
 
 #Ecrit les données TSS et TTS dans l'ordre : 
 #debut de domaine, debut de gene, fin de gene, fin de domaine
+'''
 def writeData_init(TSS, TTS, GFF) :
 	f1 = open('tousgenesidentiques/TSSevol_prev.dat', 'w')
 	f2 = open('tousgenesidentiques/TTSevol_prev.dat', 'w')
@@ -36,7 +37,7 @@ def writeData_init(TSS, TTS, GFF) :
 	shutil.copy(TSS,'tousgenesidentiques/TSSevol.dat')
 	shutil.copy(TTS,'tousgenesidentiques/TTSevol.dat')
 	shutil.copy(GFF,'tousgenesidentiques/tousgenesidentiques_evol.gff')
-
+'''
 
 def loadData(TSS, TTS, PROT, GFF) :
 	num_gene = []
@@ -198,6 +199,11 @@ def inversion(dom_pos, gene_pos, sens, num_gene) :
 	new_pos_gene = []
 	new_pos_dom = []
 	new_sens = sens
+	####################
+	#FOR THE EXPERIENCE#
+	####################
+	size_inv = pos2 - pos1
+	
 	###########################################
 	#Verify that the genes are not cut in half# #Condition normalement vérifiée dans random_event
 	###########################################
@@ -450,8 +456,10 @@ def random_event(dom_pos, gene_pos, sens, num_gene, q, FILE_EVENTS, FILE_FITNESS
 def exp_1() :
 	qs = [0.00001, 0.00005, 0.0001, 0.0005, 0.001, 0.005]
 	for q in qs : #Le 1 des parametres signifie que c'est la première répétition
-		PARAMS = "1_" + str(q) + "_" + str(1) + "_" + str(round(1/3, 2)) #1/3 = proba d'inversion
+		PARAMS = "exp1_" + 'q' + str(q) + "_rep" + str(3) + "_P" + str(round(1/3, 2)) #1/3 = proba d'inversion
 		main(PARAMS, q, 1000)
+
+
 		
 def exp_2() : 
 
@@ -488,6 +496,15 @@ def exp_5() :
 		proba = prob
 		main(PARAMS, q, 1000)
 		
+def exp_6() :
+	qs = [0.00001, 0.00005, 0.0001]
+	for q in qs : #Le 1 des parametres signifie que c'est la première répétition
+		PARAMS = "exp1_" + 'q' + str(q) + "_rep" + str(3) + "_P" + str(round(1/3, 2)) #1/3 = proba d'inversion
+		main(PARAMS, q, 1000)
+
+
+		
+	
 ################
 #TESTS METHODES#
 ################
@@ -532,6 +549,7 @@ if __name__ == "__main__" :
 	#exp_2()
 	#exp_3()
 	#exp_4()
-	exp_5()
+	#exp_5()
 	#exp_6()
+	exp_6()
 
