@@ -460,7 +460,7 @@ def exp_2() :
 	PARAMS = "1_" + str(q) + "_" + str(1) + "_" + str(round(prob, 2)) 
 	global proba
 	proba = prob
-	main(PARAMS, q, 2)
+	main(PARAMS, q, 1000)
 		
 def exp_3() : 
 	prob = 0.2
@@ -468,7 +468,7 @@ def exp_3() :
 	PARAMS = "1_" + str(q) + "_" + str(1) + "_" + str(round(prob, 2)) 
 	global proba
 	proba = prob
-	main(PARAMS, q, 2)
+	main(PARAMS, q, 1000)
 
 def exp_4() : 
 	probs = [0.3,0.4,0.5,0.6]
@@ -477,7 +477,7 @@ def exp_4() :
 		PARAMS = "1_" + str(q) + "_" + str(1) + "_" + str(round(prob, 2)) 
 		global proba
 		proba = prob
-		main(PARAMS, q, 2)
+		main(PARAMS, q, 1000)
 		
 def exp_5() : 
 	probs = [0.7,0.8,0.9]
@@ -486,7 +486,7 @@ def exp_5() :
 		PARAMS = "1_" + str(q) + "_" + str(1) + "_" + str(round(prob, 2)) 
 		global proba
 		proba = prob
-		main(PARAMS, q, 2)
+		main(PARAMS, q, 1000)
 		
 ################
 #TESTS METHODES#
@@ -529,9 +529,9 @@ if __name__ == "__main__" :
 	#PARAMS = "abc"
 	#main(PARAMS, 0.0001, 100)
 	#exp_1()
-	exp_2()
+	#exp_2()
 	#exp_3()
 	#exp_4()
-	#exp_5()
+	exp_5()
 	#exp_6()
 
