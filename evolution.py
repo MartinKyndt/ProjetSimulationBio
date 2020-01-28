@@ -499,11 +499,20 @@ def exp_5() :
 def exp_6() :
 	qs = [0.00001, 0.00005, 0.0001]
 	for q in qs : #Le 1 des parametres signifie que c'est la première répétition
-		PARAMS = "exp1_" + 'q' + str(q) + "_rep" + str(3) + "_P" + str(round(1/3, 2)) #1/3 = proba d'inversion
+		PARAMS = "exp1_" + 'q' + str(q) + "_rep" + str(2) + "_P" + str(round(1/3, 2)) #1/3 = proba d'inversion
 		main(PARAMS, q, 1000)
 
-
+def exp_7() :
+	qs = 0.0001
+	PARAMS = "exp1_" + 'q' + str(qs) + "_rep" + str(3) + "_P" + str(round(1/3, 2)) #1/3 = proba d'inversion
+	main(PARAMS, qs, 1000)
 		
+def exp_8() :
+	qs = #je te laisse mettre ta valeur
+	for i in range(3,8) : #Le 1 des parametres signifie que c'est la première répétition
+		PARAMS = "exp1_" + 'q' + str(qs) + "_rep" + str(i) + "_P" + str(round(1/3, 2)) #1/3 = proba d'inversion
+		main(PARAMS, qs, 1000)
+	
 	
 ################
 #TESTS METHODES#
@@ -551,5 +560,6 @@ if __name__ == "__main__" :
 	#exp_4()
 	#exp_5()
 	#exp_6()
-	exp_6()
+	#exp_6()
+	exp_7()
 
