@@ -9,6 +9,7 @@ import time
 import pdb #Debugueur
 import matplotlib.pyplot as plt
 from TwisTranscripT.TSC import *
+import os.path
 
 
 print('Ceci est notre code') 
@@ -16,7 +17,7 @@ print('Ceci est notre code')
 ####################################
 #ECRITURE ET LA LECTURE DE FICHIERS#
 ####################################
-proba = 1/3
+proba = 0
 
 #Ecrit les données TSS et TTS dans l'ordre : 
 #debut de domaine, debut de gene, fin de gene, fin de domaine
@@ -202,7 +203,16 @@ def inversion(dom_pos, gene_pos, sens, num_gene) :
 	####################
 	#FOR THE EXPERIENCE#
 	####################
+	
+	global size_inv
 	size_inv = pos2 - pos1
+	if it == 1 :
+		if os.path.exists("inversion_fitness.txt") :
+			fileinv = open("inversion_fitness.txt", "a")
+		else :
+			fileinv = open("inversion_fitness.txt", "w")
+		fileinv.write(str(size_inv) + ',')
+		fileinv.close()
 	
 	###########################################
 	#Verify that the genes are not cut in half# #Condition normalement vérifiée dans random_event
@@ -392,8 +402,14 @@ def majFitness(num_gene, dom_pos, gene_pos, sens, FILE_EVENTS, FILE_FITNESS, eve
 	f = open(FILE_EVENTS, 'r')
 	line = f.readline()
 	f.close()
+	if os.path.exists("inversion_fitness.txt") :
+		fileinv = open("inversion_fitness.txt", "a")
+	else :
+		fileinv = open("inversion_fitness.txt", "w")
 	if(newfitness > float(t[len(t)-1][1])) :
 		f2.write('\n' + event.split(',')[0] + ':' + str(newfitness)) #Write superior fitness
+		delta_fitness = float(t[len(t)-1][1]) - newfitness
+		fileinv.write(str(-delta_fitness) +'\n')	
 	else :
 		delta_fitness = float(t[len(t)-1][1]) - newfitness
 		dice = random.random()
@@ -401,12 +417,15 @@ def majFitness(num_gene, dom_pos, gene_pos, sens, FILE_EVENTS, FILE_FITNESS, eve
 		if dice < math.exp(-delta_fitness/q) :
 		#if(math.exp(-delta_fitness/q) < 0.5)  :
 			f2.write('\n' + event.split(',')[0] + ':' + str(newfitness))  #Write inferior fitness
-		
+			fileinv.write(str(-delta_fitness) +'\n')	
 		else : 
 			#Return to previous step
 			new_dom_pos, new_gene_pos, new_sens, new_num_gene = writeData_return(FILE_EVENTS)
 			f2.write('\n'+last_line)
+			fileinv.write(str(0) +'\n')
 	f2.close()
+	fileinv.close()
+		
 	#return newfitness, num_gene, dom_pos, gene_pos, sens
 	return new_dom_pos, new_gene_pos, new_sens, new_num_gene,
 
@@ -511,17 +530,14 @@ def exp_7() :
 		PARAMS = "exp1_" + 'q' + str(q) + "_rep" + str(rep) + "_P" + str(round(1/3, 2)) #1/3 = proba d'inversion
 		main(PARAMS, q, 1000)
 
-def exp_7() :
-	qs = 0.0001
-	PARAMS = "exp1_" + 'q' + str(qs) + "_rep" + str(3) + "_P" + str(round(1/3, 2)) #1/3 = proba d'inversion
-	main(PARAMS, qs, 1000)
+
 		
 def exp_8() :
-	qs = #je te laisse mettre ta valeur
-	for i in range(3,8) : #Le 1 des parametres signifie que c'est la première répétition
-		PARAMS = "exp1_" + 'q' + str(qs) + "_rep" + str(i) + "_P" + str(round(1/3, 2)) #1/3 = proba d'inversion
-		main(PARAMS, qs, 1000)
-	
+	q = 0.0001
+	for i in range(5000) :
+		PARAMS = "inversion_fitness" #1/3 = proba d'inversion
+		main(PARAMS, q, 2)
+		
 	
 ################
 #TESTS METHODES#
@@ -544,10 +560,10 @@ def main(PARAMS, q, nbgeneration) :
 	fitnesses.close()
 	events = open(FILE_EVENTS, 'w')
 	events.close()
+	global it
+	for it in range(nbgeneration) :
 
-	for i in range(nbgeneration) :
-
-		print("\nIteration : ", i+1)
+		print("\nIteration : ", it+1)
 		dom_pos, gene_pos, sens, num_gene = random_event(dom_pos, gene_pos, sens, num_gene, q, FILE_EVENTS, FILE_FITNESS)
 	end_time = time.time()
 	t = end_time - start_time
@@ -570,5 +586,5 @@ if __name__ == "__main__" :
 	#exp_5()
 	#exp_6()
 
-	exp_7()
+	exp_8()
 
