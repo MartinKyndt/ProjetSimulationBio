@@ -501,17 +501,14 @@ def exp_6() :
 	for q in qs : #Le 1 des parametres signifie que c'est la première répétition
 		PARAMS = "exp1_" + 'q' + str(q) + "_rep" + str(2) + "_P" + str(round(1/3, 2)) #1/3 = proba d'inversion
 		main(PARAMS, q, 1000)
-
-def exp_7() :
-	qs = 0.0001
-	PARAMS = "exp1_" + 'q' + str(qs) + "_rep" + str(3) + "_P" + str(round(1/3, 2)) #1/3 = proba d'inversion
-	main(PARAMS, qs, 1000)
 		
-def exp_8() :
-	qs = #je te laisse mettre ta valeur
-	for i in range(3,8) : #Le 1 des parametres signifie que c'est la première répétition
-		PARAMS = "exp1_" + 'q' + str(qs) + "_rep" + str(i) + "_P" + str(round(1/3, 2)) #1/3 = proba d'inversion
+def exp_7() :
+	qs = 0.00001
+	for rep in range(3,8) : #Le 1 des parametres signifie que c'est la première répétition
+		PARAMS = "exp1_" + 'q' + str(qs) + "_rep" + str(rep) + "_P" + str(round(1/3, 2)) #1/3 = proba d'inversion
 		main(PARAMS, qs, 1000)
+
+
 	
 	
 ################
