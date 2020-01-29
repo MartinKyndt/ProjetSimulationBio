@@ -454,7 +454,7 @@ def random_event(dom_pos, gene_pos, sens, num_gene, q, FILE_EVENTS, FILE_FITNESS
 
 #Effet du q sur l'évolution de la fitness --> avec l'historique des fitness, on mesure le dfit/dt en fonction du q et la fitness maximale et finale atteinte en moyenne sur 9 simulation par q
 def exp_1() :
-	qs = [0.00001, 0.00005, 0.0001, 0.0005, 0.001, 0.005]
+	qs = [0.005]
 	for q in qs : #Le 1 des parametres signifie que c'est la première répétition
 		PARAMS = "exp1_" + 'q' + str(q) + "_rep" + str(3) + "_P" + str(round(1/3, 2)) #1/3 = proba d'inversion
 		main(PARAMS, q, 1000)
@@ -500,6 +500,15 @@ def exp_6() :
 	qs = [0.00001, 0.00005, 0.0001]
 	for q in qs : #Le 1 des parametres signifie que c'est la première répétition
 		PARAMS = "exp1_" + 'q' + str(q) + "_rep" + str(3) + "_P" + str(round(1/3, 2)) #1/3 = proba d'inversion
+		main(PARAMS, q, 1000)
+		
+def exp_7() :
+	#q = 0.0001
+	q = 0.0005
+	#q = 0.00001
+	#q = 0.00005
+	for rep in range(3,8) :
+		PARAMS = "exp1_" + 'q' + str(q) + "_rep" + str(rep) + "_P" + str(round(1/3, 2)) #1/3 = proba d'inversion
 		main(PARAMS, q, 1000)
 
 
@@ -551,5 +560,5 @@ if __name__ == "__main__" :
 	#exp_4()
 	#exp_5()
 	#exp_6()
-	exp_6()
+	exp_7()
 
